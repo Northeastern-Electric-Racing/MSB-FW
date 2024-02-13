@@ -22,6 +22,6 @@ void stop_can_publisher() {
     running = 0;
 }
 
-void push_can_queue(string message) {
+void push_can_queue(char* message) {
     queue[queue_index++] = message;
 }

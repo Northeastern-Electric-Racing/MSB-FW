@@ -2,7 +2,7 @@
 #include "api/msb_main.h"
 #include "api/msb_can.h"
 
-osThreadId_t canTaskHandle;
+//osThreadId_t canTaskHandle;
 
 void init_msb() {
     // spawn CAN output thread
