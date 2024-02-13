@@ -4,4 +4,6 @@
 
 void start_msb();
 
+void stop_msb();
+
 #endif

@@ -7,7 +7,6 @@ osThreadId_t canTaskHandle;
 
 void init_msb() {
     // spawn CAN output thread
-    // canTaskHandle = osThreadNew(start_can_publisher, NULL, NULL);
     start_can_publisher();
 }
 
@@ -21,3 +20,6 @@ void start_msb() {
 
 }
 
+void stop_msb() {
+    
+}
