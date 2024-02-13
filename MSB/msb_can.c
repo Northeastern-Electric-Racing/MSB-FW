@@ -2,7 +2,9 @@
 #include "api/msb_common.h"
 #include "api/msb_can.h"
 
-char* queue[25];
+#define MAX_SIZE 25
+
+char* queue[MAX_SIZE];
 int queue_index;
 int running = 0;
 
@@ -22,6 +24,9 @@ void stop_can_publisher() {
     running = 0;
 }
 
-void push_can_queue(char* message) {
+short push_can_queue(char* message) {
+    if (queue_index == MAX_SIZE) return 0;
+    
     queue[queue_index++] = message;
+    return 1;
 }
