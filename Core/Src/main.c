@@ -137,11 +137,11 @@ int main(void)
   /* Create the thread(s) */
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-  temp_ptr = &read_temp_msb;
+
   /* USER CODE BEGIN RTOS_THREADS */
   osThreadId_t tempThread = osThreadNew(read_temp_msb, NULL, NULL); 
-  //osThreadId_t imuThread = osThreadNew(read_imu_msb, NULL, NULL); 
-  //osThreadId_t centralThread = osThreadNew(read_central_msb, NULL, NULL);
+  osThreadId_t imuThread = osThreadNew(read_imu_msb, NULL, NULL); 
+  osThreadId_t centralThread = osThreadNew(read_central_msb, NULL, NULL);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
