@@ -2,7 +2,7 @@
 #ifndef MSB_TEMP_H
 #define MSB_TEMP_H
 
-#include "api/msb_common.h"
+#include "msb_common.h"
 
 typedef struct msb_temp {
     const short id;
