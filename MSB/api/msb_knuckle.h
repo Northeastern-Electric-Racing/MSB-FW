@@ -2,13 +2,13 @@
 #ifndef MSB_KNUCKLE_H
 #define MSB_KNUCKLE_H
 
-#include "api/msb_common.h"
+#include "msb_common.h"
 
 typedef struct msb_knuckle {
     const short id;
 } msb_knuckle_t;
 
-typedef struct knuckle_data_t {
+typedef struct msb_data {
     int accerlation;
     int x_angle;
     int y_angle;
