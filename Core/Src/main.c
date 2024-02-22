@@ -23,7 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "../../MSB/api/msb_main.h"
-#include "../../MSB/api/read_msb_data.h"
+#include "../../MSB/api/monitor_msb.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -139,9 +139,9 @@ int main(void)
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  osThreadId_t tempThread = osThreadNew(read_temp_msb, NULL, NULL); 
-  osThreadId_t imuThread = osThreadNew(read_imu_msb, NULL, NULL); 
-  osThreadId_t centralThread = osThreadNew(read_central_msb, NULL, NULL);
+  osThreadId_t tempThread = osThreadNew(monitor_temp_msb, NULL, NULL); 
+  osThreadId_t imuThread = osThreadNew(monitor_knuckle_msb, NULL, NULL); 
+  osThreadId_t centralThread = osThreadNew(monitor_central_msb, NULL, NULL);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

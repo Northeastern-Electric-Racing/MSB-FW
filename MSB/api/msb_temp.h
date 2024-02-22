@@ -8,13 +8,12 @@ typedef struct msb_temp {
     const short id;
 } msb_temp_t;
 
-typedef struct temp_data
-{
+typedef struct temp_data {
     int data;
     char unit;
 } temp_data_t;
 
-
-int monitor_temp(temp_data_t* output);
+int measure_temp(temp_data_t* out);
 
 #endif
+
