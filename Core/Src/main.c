@@ -111,8 +111,11 @@ int main(void)
   MX_FDCAN1_Init();
   MX_I2C3_Init();
   MX_USART2_UART_Init();
-  /* USER CODE BEGIN 2 */
 
+  /* USER CODE BEGIN 2 */
+  msb_temp_t *temp_data;
+  msb_knuckle_t *knuckle_data;
+  msb_central_t *central_data;
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -139,9 +142,9 @@ int main(void)
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  osThreadId_t tempThread = osThreadNew(monitor_temp_msb, NULL, NULL); 
-  osThreadId_t imuThread = osThreadNew(monitor_knuckle_msb, NULL, NULL); 
-  osThreadId_t centralThread = osThreadNew(monitor_central_msb, NULL, NULL);
+  osThreadId_t tempThread = osThreadNew(monitor_temp_msb, temp_data, NULL); 
+  osThreadId_t imuThread = osThreadNew(monitor_knuckle_msb, knuckle_data, NULL); 
+  osThreadId_t centralThread = osThreadNew(monitor_central_msb, central_data, NULL);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

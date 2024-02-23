@@ -1,9 +1,14 @@
 #include "cmsis_os.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "api/monitor_msb.h"
 
-void monitor_temp_msb(msb_temp_t* msb, temp_data_t* out) {
+void monitor_temp_msb(void* arg) {
+
+    msb_temp_t* msb = (msb_temp_t*)arg;
+
+    temp_data_t* out = malloc(sizeof(temp_data_t));
 
     char status[100];
     for (;;) {
@@ -15,9 +20,14 @@ void monitor_temp_msb(msb_temp_t* msb, temp_data_t* out) {
         push_can_queue(status);
         osDelay(500);
     }
+    free(out); //Check if this works
 }
 
-void monitor_knuckle_msb(msb_knuckle_t* msb, knuckle_data_t* out) {
+void monitor_knuckle_msb(void* arg) {
+
+    msb_knuckle_t* msb = (msb_knuckle_t*)arg;
+
+    knuckle_data_t* out = malloc(sizeof(knuckle_data_t));
 
     char status[100];
     for (;;) {
@@ -30,9 +40,14 @@ void monitor_knuckle_msb(msb_knuckle_t* msb, knuckle_data_t* out) {
         push_can_queue(status);
         osDelay(500);
     }
+    free(out); //Check if this works
 }
 
-void monitor_central_msb(msb_central_t* msb, central_data_t* out) {
+void monitor_central_msb(void* arg) {
+
+    msb_central_t* msb = (msb_central_t*)arg;
+
+    central_data_t* out = malloc(sizeof(msb_central_t));
 
     char status[100];
     for (;;) {
@@ -53,6 +68,7 @@ void monitor_central_msb(msb_central_t* msb, central_data_t* out) {
         push_can_queue(status);
         osDelay(500);
     }
+    free(out); //Check if this works
 }
 
 
