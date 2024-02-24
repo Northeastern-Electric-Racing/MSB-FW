@@ -5,7 +5,7 @@
 #include "msb_common.h"
 
 typedef struct msb_knuckle {
-    const short id;
+    short id;
 } msb_knuckle_t;
 
 typedef struct msb_data {
