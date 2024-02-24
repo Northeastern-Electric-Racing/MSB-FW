@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include <stdlib.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -33,7 +34,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define BOARD_ID 1
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -113,9 +114,13 @@ int main(void)
   MX_USART2_UART_Init();
 
   /* USER CODE BEGIN 2 */
-  msb_temp_t *temp_data;
-  msb_knuckle_t *knuckle_data;
-  msb_central_t *central_data;
+  msb_temp_t *temp_data = malloc(sizeof(msb_temp_t));
+  msb_knuckle_t *knuckle_data = malloc(sizeof(msb_knuckle_t));
+  msb_central_t *central_data = malloc(sizeof(msb_central_t));
+
+  temp_data->id = BOARD_ID;
+  knuckle_data->id = BOARD_ID;
+  central_data->id = BOARD_ID;
   /* USER CODE END 2 */
 
   /* Init scheduler */
