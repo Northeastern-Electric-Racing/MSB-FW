@@ -5,7 +5,7 @@
 #include "msb_common.h"
 
 typedef struct msb_central {
-    const short id;
+    short id;
 } msb_central_t;
 
 typedef struct central_data {

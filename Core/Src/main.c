@@ -114,13 +114,14 @@ int main(void)
   MX_USART2_UART_Init();
 
   /* USER CODE BEGIN 2 */
-  msb_temp_t *temp_data = malloc(sizeof(msb_temp_t));
-  msb_knuckle_t *knuckle_data = malloc(sizeof(msb_knuckle_t));
-  msb_central_t *central_data = malloc(sizeof(msb_central_t));
+  msb_temp_t *msb_temp= malloc(sizeof(msb_temp_t));
+  msb_knuckle_t *msb_knuckle = malloc(sizeof(msb_knuckle_t));
+  msb_central_t *msb_central = malloc(sizeof(msb_central_t));
 
-  temp_data->id = BOARD_ID;
-  knuckle_data->id = BOARD_ID;
-  central_data->id = BOARD_ID;
+  msb_temp->id = BOARD_ID;
+  msb_knuckle->id = BOARD_ID;
+  msb_central->id = BOARD_ID;
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -147,9 +148,9 @@ int main(void)
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  osThreadId_t tempThread = osThreadNew(monitor_temp_msb, temp_data, NULL); 
-  osThreadId_t imuThread = osThreadNew(monitor_knuckle_msb, knuckle_data, NULL); 
-  osThreadId_t centralThread = osThreadNew(monitor_central_msb, central_data, NULL);
+  osThreadId_t tempThread = osThreadNew(monitor_temp_msb, msb_temp, NULL); 
+  osThreadId_t imuThread = osThreadNew(monitor_knuckle_msb, msb_knuckle, NULL); 
+  osThreadId_t centralThread = osThreadNew(monitor_central_msb, msb_central, NULL);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
