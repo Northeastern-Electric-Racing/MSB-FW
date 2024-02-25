@@ -97,6 +97,14 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
+  msb_temp_t *msb_temp= malloc(sizeof(msb_temp_t));
+  msb_knuckle_t *msb_knuckle = malloc(sizeof(msb_knuckle_t));
+  msb_central_t *msb_central = malloc(sizeof(msb_central_t));
+
+  msb_temp->id = BOARD_ID;
+  msb_knuckle->id = BOARD_ID;
+  msb_central->id = BOARD_ID;
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -114,13 +122,6 @@ int main(void)
   MX_USART2_UART_Init();
 
   /* USER CODE BEGIN 2 */
-  msb_temp_t *msb_temp= malloc(sizeof(msb_temp_t));
-  msb_knuckle_t *msb_knuckle = malloc(sizeof(msb_knuckle_t));
-  msb_central_t *msb_central = malloc(sizeof(msb_central_t));
-
-  msb_temp->id = BOARD_ID;
-  msb_knuckle->id = BOARD_ID;
-  msb_central->id = BOARD_ID;
 
   /* USER CODE END 2 */
 
@@ -452,7 +453,9 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-  start_msb();
+  for (;;) {
+    
+  }
   /* USER CODE END 5 */
 }
 
