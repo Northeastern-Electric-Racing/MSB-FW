@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "can_handler.h"
+#include "controller.h"
 #include "serial_monitor.h"
 #include "monitor.h"
 #include "msb.h"
@@ -61,9 +62,9 @@ UART_HandleTypeDef huart2;
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+    .name = "defaultTask",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t)osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
 
@@ -91,9 +92,9 @@ void StartDefaultTask(void *argument);
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
 
@@ -127,6 +128,32 @@ int main(void)
   MX_SPI2_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  // determine MSB location
+  bool loc1 = HAL_GPIO_ReadPin(Addr0_GPIO_Port, Addr0_Pin);
+  bool loc2 = HAL_GPIO_ReadPin(Addr1_GPIO_Port, Addr1_Pin);
+  bool loc3 = HAL_GPIO_ReadPin(Addr2_GPIO_Port, Addr2_Pin);
+
+  device_loc_t loc;
+  if (loc1 && loc2)
+  {
+    loc = DEVICE_FRONT_LEFT;
+  }
+  else if (loc1 && !loc2)
+  {
+    loc = DEVICE_FRONT_RIGHT;
+  }
+  else if (!loc1 && loc2)
+  {
+    loc = DEVICE_BACK_LEFT;
+  }
+  else if (!loc1 && !loc3)
+  {
+    loc = DEVICE_BACK_RIGHT;
+  }
+  else
+  {
+    loc = DEVICE_FRONT_LEFT;
+  }
 
   /* USER CODE END 2 */
 
@@ -138,7 +165,7 @@ int main(void)
 
   // determine the configuration of the device
 
-  msb_t *msb = init_msb(&hi2c3, &hadc1, Debug_LED_1_GPIO_Port,(uint16_t *) Debug_LED_1_Pin , Debug_LED_2_GPIO_Port,  (uint16_t *) Debug_LED_2_Pin,  (device_loc_t *) DEVICE_BACK_RIGHT);
+  msb_t *msb = init_msb(&hi2c3, &hadc1, Debug_LED_1_GPIO_Port, (uint16_t *)Debug_LED_1_Pin, Debug_LED_2_GPIO_Port, (uint16_t *)Debug_LED_2_Pin, &loc);
 
   /* USER CODE END RTOS_MUTEX */
 
@@ -168,6 +195,14 @@ int main(void)
   assert(temp_monitor_handle);
   imu_monitor_handle = osThreadNew(vIMUMonitor, msb, &imu_monitor_attributes);
   assert(imu_monitor_handle);
+  shockpot_monitor_handle = osThreadNew(vIMUMonitor, msb, &shockpot_monitor_attributes);
+  assert(shockpot_monitor_handle);
+  strain_monitor_handle = osThreadNew(vIMUMonitor, msb, &strain_monitor_attributes);
+  assert(strain_monitor_handle);
+
+  led_controller_handle = osThreadNew(vLedController, msb, &led_controller_attributes);
+  assert(led_controller_handle);
+
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -191,23 +226,23 @@ int main(void)
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * @retval None
+ */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
   /** Configure the main internal regulator output voltage
-  */
+   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
   /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
+   * in the RCC_OscInitTypeDef structure.
+   */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
@@ -218,9 +253,8 @@ void SystemClock_Config(void)
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+   */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
@@ -233,10 +267,10 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief ADC1 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief ADC1 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_ADC1_Init(void)
 {
 
@@ -251,7 +285,7 @@ static void MX_ADC1_Init(void)
   /* USER CODE END ADC1_Init 1 */
 
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
-  */
+   */
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV6;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
@@ -270,7 +304,7 @@ static void MX_ADC1_Init(void)
   }
 
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
+   */
   sConfig.Channel = ADC_CHANNEL_5;
   sConfig.Rank = 1;
   sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
@@ -280,7 +314,7 @@ static void MX_ADC1_Init(void)
   }
 
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
+   */
   sConfig.Rank = 2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -288,7 +322,7 @@ static void MX_ADC1_Init(void)
   }
 
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
+   */
   sConfig.Rank = 3;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -296,7 +330,7 @@ static void MX_ADC1_Init(void)
   }
 
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
+   */
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = 4;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
@@ -306,14 +340,13 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
-
 }
 
 /**
-  * @brief CAN1 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief CAN1 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_CAN1_Init(void)
 {
 
@@ -344,14 +377,13 @@ static void MX_CAN1_Init(void)
   init_can1(&hcan1);
 
   /* USER CODE END CAN1_Init 2 */
-
 }
 
 /**
-  * @brief I2C3 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief I2C3 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_I2C3_Init(void)
 {
 
@@ -378,14 +410,13 @@ static void MX_I2C3_Init(void)
   /* USER CODE BEGIN I2C3_Init 2 */
 
   /* USER CODE END I2C3_Init 2 */
-
 }
 
 /**
-  * @brief IWDG Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief IWDG Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_IWDG_Init(void)
 {
 
@@ -406,14 +437,13 @@ static void MX_IWDG_Init(void)
   /* USER CODE BEGIN IWDG_Init 2 */
 
   /* USER CODE END IWDG_Init 2 */
-
 }
 
 /**
-  * @brief SPI2 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief SPI2 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_SPI2_Init(void)
 {
 
@@ -444,14 +474,13 @@ static void MX_SPI2_Init(void)
   /* USER CODE BEGIN SPI2_Init 2 */
 
   /* USER CODE END SPI2_Init 2 */
-
 }
 
 /**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief USART2 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_USART2_UART_Init(void)
 {
 
@@ -477,12 +506,11 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
-
 }
 
 /**
-  * Enable DMA controller clock
-  */
+ * Enable DMA controller clock
+ */
 static void MX_DMA_Init(void)
 {
 
@@ -493,19 +521,18 @@ static void MX_DMA_Init(void)
   /* DMA2_Stream0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
-
 }
 
 /**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief GPIO Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOH_CLK_ENABLE();
@@ -514,23 +541,23 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, VCC5_En_Pin|Debug_LED_1_Pin|Debug_LED_2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, VCC5_En_Pin | Debug_LED_1_Pin | Debug_LED_2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : VCC5_En_Pin Debug_LED_1_Pin Debug_LED_2_Pin */
-  GPIO_InitStruct.Pin = VCC5_En_Pin|Debug_LED_1_Pin|Debug_LED_2_Pin;
+  GPIO_InitStruct.Pin = VCC5_En_Pin | Debug_LED_1_Pin | Debug_LED_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : Addr0_Pin Addr1_Pin Addr2_Pin */
-  GPIO_InitStruct.Pin = Addr0_Pin|Addr1_Pin|Addr2_Pin;
+  GPIO_InitStruct.Pin = Addr0_Pin | Addr1_Pin | Addr2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -558,9 +585,31 @@ void StartDefaultTask(void *argument)
 }
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief  Period elapsed callback in non blocking mode
+ * @note   This function is called  when TIM5 interrupt took place, inside
+ * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+ * a global variable "uwTick" used as application time base.
+ * @param  htim : TIM handle
+ * @retval None
+ */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM5)
+  {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
+
+/**
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -572,14 +621,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */

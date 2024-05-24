@@ -24,14 +24,14 @@ static osMessageQueueId_t can_outbound_queue;
 
 can_t *can1;
 
-void init_can1(CAN_HandleTypeDef* hcan)
+void init_can1(CAN_HandleTypeDef *hcan)
 {
 	assert(hcan);
 
 	can1 = malloc(sizeof(can_t));
 	assert(can1);
 
-	can1->hcan		  = hcan;
+	can1->hcan = hcan;
 
 	assert(!can_init(can1));
 
@@ -40,19 +40,21 @@ void init_can1(CAN_HandleTypeDef* hcan)
 
 osThreadId_t can_dispatch_handle;
 const osThreadAttr_t can_dispatch_attributes = {
-	.name		= "CanDispatch",
+	.name = "CanDispatch",
 	.stack_size = 128 * 8,
-	.priority	= (osPriority_t)osPriorityRealtime5,
+	.priority = (osPriority_t)osPriorityRealtime5,
 };
 
-void vCanDispatch(void* pv_params)
+void vCanDispatch(void *pv_params)
 {
 	can_msg_t msg_from_queue;
 	HAL_StatusTypeDef msg_status;
 
-	for (;;) {
+	for (;;)
+	{
 		/* Send CAN message */
-		if (osOK == osMessageQueueGet(can_outbound_queue, &msg_from_queue, NULL, osWaitForever)) {
+		if (osOK == osMessageQueueGet(can_outbound_queue, &msg_from_queue, NULL, osWaitForever))
+		{
 			msg_status = can_send_msg(can1, &msg_from_queue);
 			if (msg_status == HAL_ERROR)
 			{
@@ -62,12 +64,12 @@ void vCanDispatch(void* pv_params)
 			{
 				serial_print("Outbound mailbox full!");
 			}
-			#ifdef LOG_VERBOSE
+#ifdef LOG_VERBOSE
 			else
 			{
 				printf("Message sent: %lX\r\n", msg_from_queue.id);
 			}
-			#endif
+#endif
 		}
 
 		osDelay(DELAY_CAN_DISPATCH);
@@ -82,4 +84,3 @@ int8_t queue_can_msg(can_msg_t msg)
 	osMessageQueuePut(can_outbound_queue, &msg, 0U, 0U);
 	return 0;
 }
-

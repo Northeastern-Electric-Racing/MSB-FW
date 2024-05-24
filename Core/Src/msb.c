@@ -5,7 +5,6 @@
 #include "lsm6dso.h"
 
 static osMutexAttr_t msb_i2c_mutex_attr;
-static osMutexAttr_t msb_adc_mutex_attr;
 
 msb_t *init_msb(I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *adc1, GPIO_TypeDef *debug_led1_gpio,
 				uint16_t *debug_led1_pin, GPIO_TypeDef *debug_led2_gpio, uint16_t *debug_led2_pin,
@@ -39,12 +38,11 @@ msb_t *init_msb(I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *adc1, GPIO_TypeDef *
 	assert(msb->imu);
 	assert(!lsm6dso_init(msb->imu, msb->hi2c)); /* This is always connected */
 
+	assert(!HAL_ADC_Start_DMA(msb->adc1, msb->adc1_buf, sizeof(msb->adc1_buf) / sizeof(uint32_t)));
+
 	/* Create Mutexes */
 	msb->i2c_mutex = osMutexNew(&msb_i2c_mutex_attr);
 	assert(msb->i2c_mutex);
-
-	msb->adc_mutex = osMutexNew(&msb_adc_mutex_attr);
-	assert(msb->adc_mutex);
 
 	return msb;
 }
@@ -71,6 +69,26 @@ int8_t measure_central_temp(msb_t *msb, uint16_t *temp, uint16_t *humidity)
 	osMutexRelease(msb->i2c_mutex);
 
 	return 0;
+}
+
+void read_adc1(msb_t *msb, uint32_t adc1_buf[3])
+{
+	memcpy(adc1_buf, msb->adc1_buf, sizeof(msb->adc1_buf));
+}
+
+void read_shockpot(msb_t *msb, uint32_t shockpot_sense)
+{
+	memcpy((uint32_t *)shockpot_sense, msb->adc1_buf, sizeof(shockpot_sense));
+}
+
+void read_strain1(msb_t *msb, uint32_t strain1)
+{
+	memcpy((uint32_t *)strain1, msb->adc1_buf + 1, sizeof(strain1));
+}
+
+void read_strain2(msb_t *msb, uint32_t strain2)
+{
+	memcpy((uint32_t *)strain2, msb->adc1_buf + 2, sizeof(strain2));
 }
 
 int8_t read_accel(msb_t *msb, uint16_t accel[3])

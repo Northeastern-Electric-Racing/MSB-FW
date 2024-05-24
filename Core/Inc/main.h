@@ -53,12 +53,13 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
 #define VCC5_En_Pin GPIO_PIN_2
 #define VCC5_En_GPIO_Port GPIOC
+#define Shockpot_Pin GPIO_PIN_0
+#define Shockpot_GPIO_Port GPIOA
 #define Strain1_Pin GPIO_PIN_5
 #define Strain1_GPIO_Port GPIOA
 #define Strain2_Pin GPIO_PIN_6
