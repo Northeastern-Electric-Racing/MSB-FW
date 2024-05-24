@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -22,7 +22,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "can_handler.h"
+#include "serial_monitor.h"
+#include "monitor.h"
+#include "msb.h"
+#include "assert.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -131,6 +135,11 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
+
+  // determine the configuration of the device
+
+  msb_t *msb = init_msb(&hi2c3, &hadc1, Debug_LED_1_GPIO_Port,(uint16_t *) Debug_LED_1_Pin , Debug_LED_2_GPIO_Port,  (uint16_t *) Debug_LED_2_Pin,  (device_loc_t *) DEVICE_BACK_RIGHT);
+
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
@@ -143,6 +152,10 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+  can_dispatch_handle = osThreadNew(vCanDispatch, NULL, &can_dispatch_attributes);
+  assert(can_dispatch_handle);
+  serial_monitor_handle = osThreadNew(vSerialMonitor, NULL, &serial_monitor_attributes);
+  assert(serial_monitor_handle);
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -151,6 +164,10 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  temp_monitor_handle = osThreadNew(vTempMonitor, msb, &temp_monitor_attributes);
+  assert(temp_monitor_handle);
+  imu_monitor_handle = osThreadNew(vIMUMonitor, msb, &imu_monitor_attributes);
+  assert(imu_monitor_handle);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -324,6 +341,7 @@ static void MX_CAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
+  init_can1(&hcan1);
 
   /* USER CODE END CAN1_Init 2 */
 
@@ -521,18 +539,20 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN Header_StartDefaultTask */
 /**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
+ * @brief  Function implementing the defaultTask thread.
+ * @param  argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-  for(;;)
+  for (;;)
   {
-    osDelay(1);
+    /* Pet watchdog, will reset after 4ish seconds */
+    HAL_IWDG_Refresh(&hiwdg);
+    osDelay(500);
   }
   /* USER CODE END 5 */
 }
