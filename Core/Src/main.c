@@ -195,6 +195,8 @@ int main(void)
   assert(temp_monitor_handle);
   imu_monitor_handle = osThreadNew(vIMUMonitor, msb, &imu_monitor_attributes);
   assert(imu_monitor_handle);
+  tof_monitor_handle = osThreadNew(vIMUMonitor, msb, &tof_monitor_attributes);
+  assert(tof_monitor_handle);
   shockpot_monitor_handle = osThreadNew(vIMUMonitor, msb, &shockpot_monitor_attributes);
   assert(shockpot_monitor_handle);
   strain_monitor_handle = osThreadNew(vIMUMonitor, msb, &strain_monitor_attributes);

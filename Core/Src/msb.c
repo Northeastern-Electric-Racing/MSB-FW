@@ -1,5 +1,6 @@
 #include "msb.h"
 #include <assert.h>
+#include <serial_monitor.h>
 #include <string.h>
 #include <stdlib.h>
 #include "lsm6dso.h"
@@ -37,6 +38,13 @@ msb_t *init_msb(I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *adc1, GPIO_TypeDef *
 	msb->imu = malloc(sizeof(lsm6dso_t));
 	assert(msb->imu);
 	assert(!lsm6dso_init(msb->imu, msb->hi2c)); /* This is always connected */
+
+	/* Initialize the ToF sensor */
+	msb->tof = malloc(sizeof(VL6180xDev_t));
+	assert(msb->tof);
+	assert(!VL6180x_WaitDeviceBooted(msb->tof));
+	assert(!VL6180x_InitData(msb->tof));
+	assert(!VL6180x_Prepare(msb->tof));
 
 	assert(!HAL_ADC_Start_DMA(msb->adc1, msb->adc1_buf, sizeof(msb->adc1_buf) / sizeof(uint32_t)));
 
@@ -124,6 +132,28 @@ int8_t read_gyro(msb_t *msb, uint16_t gyro[3])
 		return hal_stat;
 
 	memcpy(gyro, msb->imu->gyro_data, 3);
+
+	osMutexRelease(msb->i2c_mutex);
+	return 0;
+}
+
+VL6180x_RangeData_t *range;
+int8_t read_distance(msb_t *msb, int32_t *range_mm) {
+	if (!msb)
+		return -1;
+
+	osStatus_t mut_stat = osMutexAcquire(msb->i2c_mutex, osWaitForever);
+	if (mut_stat)
+		return mut_stat;
+
+	VL6180x_RangePollMeasurement(msb->tof, range);
+	if (range->errorStatus) {
+		serial_print("Error in range %f", VL6180x_RangeGetStatusErrString(range->errorStatus));
+		return range->errorStatus;
+	}
+
+	memcpy(range_mm, &range->range_mm, sizeof(range->range_mm));
+	
 
 	osMutexRelease(msb->i2c_mutex);
 	return 0;
