@@ -14,5 +14,5 @@ jobs:
       uses: Northeastern-Electric-Racing/clang-format-action@main
       with:
         clang-format-version: '17'
-        check_path: "Core/"
+        check-path: "Core/"
         format-filepath: "./Drivers/Embedded-Base/clang-format"
