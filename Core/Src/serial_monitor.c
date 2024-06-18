@@ -15,10 +15,10 @@ const osThreadAttr_t serial_monitor_attributes;
  * Referenced https://github.com/esp8266/Arduino/blob/master/cores/esp8266/Print.cpp
  * Preformat string then put into a buffer
  */
-int serial_print(const char *format, ...)
+int serial_print(const char* format, ...)
 {
 	va_list arg;
-	char *buffer = malloc(sizeof(char) * PRINTF_BUFFER_LEN);
+	char* buffer = malloc(sizeof(char) * PRINTF_BUFFER_LEN);
 	if (buffer == NULL)
 		return -1;
 
@@ -28,16 +28,14 @@ int serial_print(const char *format, ...)
 	va_end(arg);
 
 	/* Check to make sure we don't overflow buffer */
-	if (len > PRINTF_BUFFER_LEN - 1)
-	{
+	if (len > PRINTF_BUFFER_LEN - 1) {
 		free(buffer);
 		return -2;
 	}
 
 	/* If string can't be queued */
 	osStatus_t stat = osMessageQueuePut(printf_queue, &buffer, 0U, 0U);
-	if (stat)
-	{
+	if (stat) {
 		free(buffer);
 		return -3;
 	}
@@ -45,23 +43,19 @@ int serial_print(const char *format, ...)
 	return 0;
 }
 
-void vSerialMonitor(void *pv_params)
+void vSerialMonitor(void* pv_params)
 {
-	char *message;
+	char* message;
 	osStatus_t status;
 
-	printf_queue = osMessageQueueNew(PRINTF_QUEUE_SIZE, sizeof(char *), NULL);
+	printf_queue = osMessageQueueNew(PRINTF_QUEUE_SIZE, sizeof(char*), NULL);
 
-	for (;;)
-	{
+	for (;;) {
 		/* Wait until new printf message comes into queue */
 		status = osMessageQueueGet(printf_queue, &message, NULL, osWaitForever);
-		if (status != osOK)
-		{
+		if (status != osOK) {
 			// TODO: Trigger fault ?
-		}
-		else
-		{
+		} else {
 			printf(message);
 			free(message);
 		}
