@@ -74,6 +74,8 @@ Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c \
 Drivers/Embedded-Base/platforms/stm32f405/src/can.c \
 Drivers/Embedded-Base/general/src/lsm6dso.c \
+Drivers/Embedded-Base/general/src/vl6180x_api.c \
+Drivers/Embedded-Base/general/src/vl6180x_i2c.c \
 Drivers/Embedded-Base/middleware/src/c_utils.c \
 Drivers/Embedded-Base/middleware/general/src/sht30.c \
 Middlewares/Third_Party/FreeRTOS/Source/croutine.c \

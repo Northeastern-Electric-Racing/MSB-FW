@@ -14,6 +14,10 @@ void vIMUMonitor(void *pv_params);
 extern osThreadId_t imu_monitor_handle;
 extern const osThreadAttr_t imu_monitor_attributes;
 
+void vTOFMonitor(void *pv_params);
+extern osThreadId_t tof_monitor_handle;
+extern const osThreadAttr_t tof_monitor_attributes;
+
 void vShockpotMonitor(void *pv_params);
 extern osThreadId_t shockpot_monitor_handle;
 extern const osThreadAttr_t shockpot_monitor_attributes;

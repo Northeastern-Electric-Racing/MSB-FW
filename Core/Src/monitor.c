@@ -169,6 +169,46 @@ void vIMUMonitor(void *pv_params)
     }
 }
 
+osThreadId_t tof_monitor_handle;
+const osThreadAttr_t tof_monitor_attributes = {
+    .name = "TOFMonitor",
+    .stack_size = 32 * 8,
+    .priority = (osPriority_t)osPriorityHigh,
+};
+
+void vTOFMonitor(void *pv_params)
+{
+    msb_t *msb = (msb_t *)pv_params;
+
+    can_msg_t range_msg = {.id = convert_can(CANID_TOF, msb->device_loc), .len = 4, .data = {0}};
+
+    int32_t range;
+
+    for (;;)
+    {
+        if (read_distance(msb, &range))
+        {
+            serial_print("failed to read distance!");
+            continue;
+        }
+
+#ifdef LOG_VERBOSE
+        serial_print("Range is: %d", range);
+#endif
+
+        endian_swap(&range, sizeof(range));
+
+        memcpy(range_msg.data, &range, range_msg.len);
+        /* Send CAN message */
+        if (queue_can_msg(range_msg))
+        {
+            serial_print("Failed to send CAN message");
+        }
+
+        osDelay(DELAY_TOF_REFRESH);
+    }
+}
+
 osThreadId_t shockpot_monitor_handle;
 const osThreadAttr_t shockpot_monitor_attributes = {
     .name = "ShockpotMonitor",

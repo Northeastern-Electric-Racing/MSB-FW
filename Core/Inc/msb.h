@@ -6,6 +6,7 @@
 #include "sht30.h"
 #include "stm32f405xx.h"
 #include "cmsis_os.h"
+#include "vl6180x_api.h"
 
 typedef enum
 {
@@ -20,6 +21,7 @@ typedef struct
     I2C_HandleTypeDef *hi2c;
     sht30_t *temp_sensor;
     lsm6dso_t *imu;
+    VL6180xDev_t tof;
     ADC_HandleTypeDef *adc1;
     uint32_t adc1_buf[3];
     GPIO_TypeDef *debug_led1_gpio;
@@ -39,6 +41,8 @@ int8_t measure_central_temp(msb_t *msb, uint16_t *temp, uint16_t *humidity);
 int8_t read_accel(msb_t *msb, uint16_t accel[3]);
 
 int8_t read_gyro(msb_t *msb, uint16_t gyro[3]);
+
+int8_t read_distance(msb_t *msb, int32_t *range_mm);
 
 int8_t write_debug1(msb_t *msb, bool status);
 
