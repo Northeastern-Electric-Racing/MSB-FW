@@ -4,11 +4,11 @@ jobs:
   run-build:
     runs-on: ubuntu-latest
     container:
-        image: nwdepatie/ner-gcc-arm:latest
+        image: ghcr.io/northeastern-electric-racing/embedded-base:latest
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
             submodules: recursive
 
