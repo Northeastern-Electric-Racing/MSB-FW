@@ -22,9 +22,9 @@
 #define CAN_MSG_QUEUE_SIZE 25 /* messages */
 static osMessageQueueId_t can_outbound_queue;
 
-can_t* can1;
+can_t *can1;
 
-void init_can1(CAN_HandleTypeDef* hcan)
+void init_can1(CAN_HandleTypeDef *hcan)
 {
 	assert(hcan);
 
@@ -35,7 +35,8 @@ void init_can1(CAN_HandleTypeDef* hcan)
 
 	assert(!can_init(can1));
 
-	can_outbound_queue = osMessageQueueNew(CAN_MSG_QUEUE_SIZE, sizeof(can_msg_t), NULL);
+	can_outbound_queue =
+		osMessageQueueNew(CAN_MSG_QUEUE_SIZE, sizeof(can_msg_t), NULL);
 }
 
 osThreadId_t can_dispatch_handle;
@@ -45,14 +46,16 @@ const osThreadAttr_t can_dispatch_attributes = {
 	.priority = (osPriority_t)osPriorityRealtime5,
 };
 
-void vCanDispatch(void* pv_params)
+void vCanDispatch(void *pv_params)
 {
 	can_msg_t msg_from_queue;
 	HAL_StatusTypeDef msg_status;
 
 	for (;;) {
 		/* Send CAN message */
-		if (osOK == osMessageQueueGet(can_outbound_queue, &msg_from_queue, NULL, osWaitForever)) {
+		if (osOK == osMessageQueueGet(can_outbound_queue,
+					      &msg_from_queue, NULL,
+					      osWaitForever)) {
 			msg_status = can_send_msg(can1, &msg_from_queue);
 			if (msg_status == HAL_ERROR) {
 				serial_print("Failed to send CAN message");
@@ -61,7 +64,8 @@ void vCanDispatch(void* pv_params)
 			}
 #ifdef LOG_VERBOSE
 			else {
-				printf("Message sent: %lX\r\n", msg_from_queue.id);
+				printf("Message sent: %lX\r\n",
+				       msg_from_queue.id);
 			}
 #endif
 		}

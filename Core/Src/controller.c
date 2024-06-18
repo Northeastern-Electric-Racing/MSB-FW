@@ -9,10 +9,9 @@ const osThreadAttr_t led_controller_attributes = {
 	.priority = (osPriority_t)osPriorityBelowNormal1,
 };
 
-void vLedController(void* pv_params)
+void vLedController(void *pv_params)
 {
-
-	msb_t* msb = (msb_t*)pv_params;
+	msb_t *msb = (msb_t *)pv_params;
 
 	switch (*msb->device_loc) {
 	case DEVICE_FRONT_LEFT:
@@ -34,7 +33,6 @@ void vLedController(void* pv_params)
 	}
 
 	for (;;) {
-
 		osDelay(DELAY_DEBUG_LED_REFRESH);
 	}
 }

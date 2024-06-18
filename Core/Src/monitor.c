@@ -13,7 +13,7 @@
 
 #include "monitor.h"
 
-uint16_t convert_can(uint16_t original_value, device_loc_t* mode)
+uint16_t convert_can(uint16_t original_value, device_loc_t *mode)
 {
 	switch (*mode) {
 	case DEVICE_FRONT_LEFT:
@@ -36,12 +36,14 @@ const osThreadAttr_t temp_monitor_attributes = {
 	.priority = (osPriority_t)osPriorityHigh1,
 };
 
-void vTempMonitor(void* pv_params)
+void vTempMonitor(void *pv_params)
 {
+	msb_t *msb = (msb_t *)pv_params;
 
-	msb_t* msb = (msb_t*)pv_params;
-
-	can_msg_t temp_sensor_msg = { .id = convert_can(CANID_TEMP_SENSOR, msb->device_loc), .len = 4, .data = { 0 } };
+	can_msg_t temp_sensor_msg = { .id = convert_can(CANID_TEMP_SENSOR,
+							msb->device_loc),
+				      .len = 4,
+				      .data = { 0 } };
 
 	struct __attribute__((__packed__)) {
 		uint16_t temp;
@@ -52,7 +54,6 @@ void vTempMonitor(void* pv_params)
 	uint16_t humidity_dat = 0;
 
 	for (;;) {
-
 		if (measure_central_temp(msb, &temp_dat, &humidity_dat)) {
 			printf("Failed to get temp");
 		}
@@ -61,14 +62,19 @@ void vTempMonitor(void* pv_params)
 		temp_sensor_data.humidity = humidity_dat;
 
 #ifdef LOG_VERBOSE
-		serial_print("Board Temperature:\t%d\r\n", temp_sensor_data.temp);
-		serial_print("Board Humidity:\t%d\r\n", temp_sensor_data.humidity);
+		serial_print("Board Temperature:\t%d\r\n",
+			     temp_sensor_data.temp);
+		serial_print("Board Humidity:\t%d\r\n",
+			     temp_sensor_data.humidity);
 #endif
 
-		endian_swap(&temp_sensor_data.temp, sizeof(temp_sensor_data.temp));
-		endian_swap(&temp_sensor_data.humidity, sizeof(temp_sensor_data.humidity));
+		endian_swap(&temp_sensor_data.temp,
+			    sizeof(temp_sensor_data.temp));
+		endian_swap(&temp_sensor_data.humidity,
+			    sizeof(temp_sensor_data.humidity));
 
-		memcpy(temp_sensor_msg.data, &temp_sensor_data, temp_sensor_msg.len);
+		memcpy(temp_sensor_msg.data, &temp_sensor_data,
+		       temp_sensor_msg.len);
 		/* Send CAN message */
 		if (queue_can_msg(temp_sensor_msg)) {
 			serial_print("Failed to send CAN message");
@@ -86,13 +92,19 @@ const osThreadAttr_t imu_monitor_attributes = {
 	.priority = (osPriority_t)osPriorityHigh,
 };
 
-void vIMUMonitor(void* pv_params)
+void vIMUMonitor(void *pv_params)
 {
-	msb_t* msb = (msb_t*)pv_params;
+	msb_t *msb = (msb_t *)pv_params;
 
 	const uint8_t num_samples = 10;
-	can_msg_t imu_accel_msg = { .id = convert_can(CANID_IMU_ACCEL, msb->device_loc), .len = 6, .data = { 0 } };
-	can_msg_t imu_gyro_msg = { .id = convert_can(CANID_IMU_GYRO, msb->device_loc), .len = 6, .data = { 0 } };
+	can_msg_t imu_accel_msg = { .id = convert_can(CANID_IMU_ACCEL,
+						      msb->device_loc),
+				    .len = 6,
+				    .data = { 0 } };
+	can_msg_t imu_gyro_msg = { .id = convert_can(CANID_IMU_GYRO,
+						     msb->device_loc),
+				   .len = 6,
+				   .data = { 0 } };
 
 	struct __attribute__((__packed__)) {
 		uint16_t accel_x;
@@ -121,16 +133,26 @@ void vIMUMonitor(void* pv_params)
 		}
 
 		/* Run values through LPF of sample size  */
-		accel_data.accel_x = (accel_data.accel_x + accel_data_temp[0]) / num_samples;
-		accel_data.accel_y = (accel_data.accel_y + accel_data_temp[1]) / num_samples;
-		accel_data.accel_z = (accel_data.accel_z + accel_data_temp[2]) / num_samples;
-		gyro_data.gyro_x = (gyro_data.gyro_x + gyro_data_temp[0]) / num_samples;
-		gyro_data.gyro_y = (gyro_data.gyro_y + gyro_data_temp[1]) / num_samples;
-		gyro_data.gyro_z = (gyro_data.gyro_z + gyro_data_temp[2]) / num_samples;
+		accel_data.accel_x =
+			(accel_data.accel_x + accel_data_temp[0]) / num_samples;
+		accel_data.accel_y =
+			(accel_data.accel_y + accel_data_temp[1]) / num_samples;
+		accel_data.accel_z =
+			(accel_data.accel_z + accel_data_temp[2]) / num_samples;
+		gyro_data.gyro_x =
+			(gyro_data.gyro_x + gyro_data_temp[0]) / num_samples;
+		gyro_data.gyro_y =
+			(gyro_data.gyro_y + gyro_data_temp[1]) / num_samples;
+		gyro_data.gyro_z =
+			(gyro_data.gyro_z + gyro_data_temp[2]) / num_samples;
 
 #ifdef LOG_VERBOSE
-		serial_print("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x, accel_data.accel_y, accel_data.accel_z);
-		serial_print("IMU Gyro x: %d y: %d z: %d \r\n", gyro_data.gyro_x, gyro_data.gyro_y, gyro_data.gyro_z);
+		serial_print("IMU Accel x: %d y: %d z: %d \r\n",
+			     accel_data.accel_x, accel_data.accel_y,
+			     accel_data.accel_z);
+		serial_print("IMU Gyro x: %d y: %d z: %d \r\n",
+			     gyro_data.gyro_x, gyro_data.gyro_y,
+			     gyro_data.gyro_z);
 #endif
 
 		/* convert to big endian */
@@ -164,11 +186,13 @@ const osThreadAttr_t tof_monitor_attributes = {
 	.priority = (osPriority_t)osPriorityHigh,
 };
 
-void vTOFMonitor(void* pv_params)
+void vTOFMonitor(void *pv_params)
 {
-	msb_t* msb = (msb_t*)pv_params;
+	msb_t *msb = (msb_t *)pv_params;
 
-	can_msg_t range_msg = { .id = convert_can(CANID_TOF, msb->device_loc), .len = 4, .data = { 0 } };
+	can_msg_t range_msg = { .id = convert_can(CANID_TOF, msb->device_loc),
+				.len = 4,
+				.data = { 0 } };
 
 	int32_t range;
 
@@ -201,12 +225,14 @@ const osThreadAttr_t shockpot_monitor_attributes = {
 	.priority = (osPriority_t)osPriorityHigh1,
 };
 
-void vShockpotMonitor(void* pv_params)
+void vShockpotMonitor(void *pv_params)
 {
+	msb_t *msb = (msb_t *)pv_params;
 
-	msb_t* msb = (msb_t*)pv_params;
-
-	can_msg_t shockpot_msg = { .id = convert_can(CANID_SHOCK_SENSE, msb->device_loc), .len = 4, .data = { 0 } };
+	can_msg_t shockpot_msg = { .id = convert_can(CANID_SHOCK_SENSE,
+						     msb->device_loc),
+				   .len = 4,
+				   .data = { 0 } };
 
 	uint32_t shock_value = 0;
 
@@ -237,12 +263,14 @@ const osThreadAttr_t strain_monitor_attributes = {
 	.priority = (osPriority_t)osPriorityHigh1,
 };
 
-void vStrainMonitor(void* pv_params)
+void vStrainMonitor(void *pv_params)
 {
+	msb_t *msb = (msb_t *)pv_params;
 
-	msb_t* msb = (msb_t*)pv_params;
-
-	can_msg_t strain_msg = { .id = convert_can(CANID_STRAIN_SENSE, msb->device_loc), .len = 8, .data = { 0 } };
+	can_msg_t strain_msg = { .id = convert_can(CANID_STRAIN_SENSE,
+						   msb->device_loc),
+				 .len = 8,
+				 .data = { 0 } };
 
 	struct __attribute__((__packed__)) {
 		uint32_t strain1;
@@ -256,7 +284,8 @@ void vStrainMonitor(void* pv_params)
 		read_strain2(msb, strain2_dat);
 
 #ifdef LOG_VERBOSE
-		serial_print("Strain 1: %d  2: %d \r\n", strain1_dat, strain2_dat);
+		serial_print("Strain 1: %d  2: %d \r\n", strain1_dat,
+			     strain2_dat);
 #endif
 
 		strain_data.strain1 = strain1_dat;
