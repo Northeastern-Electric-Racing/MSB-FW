@@ -12,4 +12,4 @@ jobs:
       uses: Northeastern-Electric-Racing/clang-format-action@main
       with:
         clang-format-version: '17'
-        format-filepath: "./Drivers/Embedded-Base/clang-format"
+        format-filepath: "${GITHUB_WORKSPACE}/Drivers/Embedded-Base/clang-format"
