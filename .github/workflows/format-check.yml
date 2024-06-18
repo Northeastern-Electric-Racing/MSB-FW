@@ -8,8 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: recursive
     - name: Run clang-format style check for C/C++ sources
       uses: Northeastern-Electric-Racing/clang-format-action@main
       with:
         clang-format-version: '17'
-        format-filepath: "$GITHUB_WORKSPACE/Drivers/Embedded-Base/clang-format"
+        check_path: "Core/"
+        format-filepath: "./Drivers/Embedded-Base/clang-format"
