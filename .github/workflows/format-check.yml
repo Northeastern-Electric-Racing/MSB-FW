@@ -14,5 +14,9 @@ jobs:
       uses: Northeastern-Electric-Racing/clang-format-action@main
       with:
         clang-format-version: '17'
+        # only check core, embedded base covered internally
         check-path: "Core/"
+        # massive regex to exclude anything CubeMX generated, could require tweaking
+        exclude-regex: "stm32.*|main.(c|h)|(?i)freertos|sys.*|(system|startup)_stm32.*"
+        # use the clang-format from embedded base
         format-filepath: "./Drivers/Embedded-Base/clang-format"
