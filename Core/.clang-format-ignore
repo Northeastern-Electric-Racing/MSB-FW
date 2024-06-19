@@ -1,4 +1,4 @@
-FreeRTOS*
-stm32*
-sys*
-./Startup/*
+./*/stm32*
+./*/sys*
+./*/FreeRTOS*
+./*/freertos*
