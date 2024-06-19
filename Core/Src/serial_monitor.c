@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define PRINTF_QUEUE_SIZE 25  /* Strings */
+#define PRINTF_QUEUE_SIZE 25 /* Strings */
 #define PRINTF_BUFFER_LEN 128 /* Characters */
 
 osMessageQueueId_t printf_queue;
@@ -28,16 +28,14 @@ int serial_print(const char *format, ...)
 	va_end(arg);
 
 	/* Check to make sure we don't overflow buffer */
-	if (len > PRINTF_BUFFER_LEN - 1)
-	{
+	if (len > PRINTF_BUFFER_LEN - 1) {
 		free(buffer);
 		return -2;
 	}
 
 	/* If string can't be queued */
 	osStatus_t stat = osMessageQueuePut(printf_queue, &buffer, 0U, 0U);
-	if (stat)
-	{
+	if (stat) {
 		free(buffer);
 		return -3;
 	}
@@ -50,18 +48,16 @@ void vSerialMonitor(void *pv_params)
 	char *message;
 	osStatus_t status;
 
-	printf_queue = osMessageQueueNew(PRINTF_QUEUE_SIZE, sizeof(char *), NULL);
+	printf_queue =
+		osMessageQueueNew(PRINTF_QUEUE_SIZE, sizeof(char *), NULL);
 
-	for (;;)
-	{
+	for (;;) {
 		/* Wait until new printf message comes into queue */
-		status = osMessageQueueGet(printf_queue, &message, NULL, osWaitForever);
-		if (status != osOK)
-		{
+		status = osMessageQueueGet(printf_queue, &message, NULL,
+					   osWaitForever);
+		if (status != osOK) {
 			// TODO: Trigger fault ?
-		}
-		else
-		{
+		} else {
 			printf(message);
 			free(message);
 		}
