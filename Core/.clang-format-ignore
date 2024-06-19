@@ -1,0 +1,4 @@
+FreeRTOS*
+stm32*
+sys*
+./Startup/*
