@@ -15,20 +15,20 @@ void vLedController(void *pv_params)
 {
 	switch (device_loc) {
 	case DEVICE_FRONT_LEFT:
-		write_debug1(true);
-		write_debug2(true);
+		debug1_write(true);
+		debug2_write(true);
 		break;
 	case DEVICE_FRONT_RIGHT:
-		write_debug1(true);
-		write_debug2(false);
+		debug1_write(true);
+		debug2_write(false);
 		break;
 	case DEVICE_BACK_LEFT:
-		write_debug1(false);
-		write_debug2(true);
+		debug1_write(false);
+		debug2_write(true);
 		break;
 	case DEVICE_BACK_RIGHT:
-		write_debug1(false);
-		write_debug2(false);
+		debug1_write(false);
+		debug2_write(false);
 		break;
 	}
 

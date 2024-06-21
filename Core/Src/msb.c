@@ -30,7 +30,7 @@ VL6180xDev_t tof;
 uint32_t adc1_buf[3];
 #endif
 
-int8_t init_msb()
+int8_t msb_init()
 {
 #ifdef SENSOR_TEMP
 	/* Initialize the Onboard Temperature Sensor */
@@ -73,7 +73,7 @@ int8_t init_msb()
 /// @brief Measure the temperature and humidity of central MSB SHT30
 /// @param out
 /// @return error code
-int8_t measure_central_temp(uint16_t *temp, uint16_t *humidity)
+int8_t central_temp_measure(uint16_t *temp, uint16_t *humidity)
 {
 	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
 	if (mut_stat)
@@ -93,33 +93,33 @@ int8_t measure_central_temp(uint16_t *temp, uint16_t *humidity)
 #endif
 
 #if defined SENSOR_SHOCKPOT || defined SENSOR_STRAIN
-void read_adc1(uint32_t result_buf[3])
+void adc1_read(uint32_t result_buf[3])
 {
 	memcpy(result_buf, adc1_buf, sizeof(adc1_buf));
 }
 #endif
 
 #ifdef SENSOR_SHOCKPOT
-void read_shockpot(uint32_t shockpot_sense)
+void shockpot_read(uint32_t shockpot_sense)
 {
 	memcpy((uint32_t *)shockpot_sense, adc1_buf, sizeof(shockpot_sense));
 }
 #endif
 
 #ifdef SENSOR_STRAIN
-void read_strain1(uint32_t strain1)
+void strain1_read(uint32_t strain1)
 {
 	memcpy((uint32_t *)strain1, adc1_buf + 1, sizeof(strain1));
 }
 
-void read_strain2(uint32_t strain2)
+void strain2_read(uint32_t strain2)
 {
 	memcpy((uint32_t *)strain2, adc1_buf + 2, sizeof(strain2));
 }
 #endif
 
 #ifdef SENSOR_IMU
-int8_t read_accel(uint16_t accel[3])
+int8_t accel_read(uint16_t accel[3])
 {
 	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
 	if (mut_stat)
@@ -135,7 +135,7 @@ int8_t read_accel(uint16_t accel[3])
 	return 0;
 }
 
-int8_t read_gyro(uint16_t gyro[3])
+int8_t gyro_read(uint16_t gyro[3])
 {
 	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
 	if (mut_stat)
@@ -154,7 +154,7 @@ int8_t read_gyro(uint16_t gyro[3])
 
 #ifdef SENSOR_TOF
 VL6180x_RangeData_t *range;
-int8_t read_distance(int32_t *range_mm)
+int8_t distance_read(int32_t *range_mm)
 {
 	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
 	if (mut_stat)
@@ -175,19 +175,19 @@ int8_t read_distance(int32_t *range_mm)
 }
 #endif
 
-int8_t write_debug1(bool status)
+int8_t debug1_write(bool status)
 {
 	HAL_GPIO_WritePin(Debug_LED_1_GPIO_Port, Debug_LED_1_Pin, status);
 	return 0;
 }
 
-int8_t write_debug2(bool status)
+int8_t debug2_write(bool status)
 {
 	HAL_GPIO_WritePin(Debug_LED_2_GPIO_Port, Debug_LED_2_Pin, status);
 	return 0;
 }
 
-int8_t write_vcc5_en(bool status)
+int8_t vcc5_en_write(bool status)
 {
 	HAL_GPIO_WritePin(VCC5_En_GPIO_Port, VCC5_En_Pin, status);
 	return 0;

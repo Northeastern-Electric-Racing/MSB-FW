@@ -55,7 +55,7 @@ void vTempMonitor(void *pv_params)
 	uint16_t humidity_dat = 0;
 
 	for (;;) {
-		if (measure_central_temp(&temp_dat, &humidity_dat)) {
+		if (central_temp_measure(&temp_dat, &humidity_dat)) {
 			printf("Failed to get temp");
 		}
 
@@ -125,11 +125,11 @@ void vIMUMonitor(void *pv_params)
 	for (;;) {
 		/* Take measurement */
 
-		if (read_accel(accel_data_temp)) {
+		if (accel_read(accel_data_temp)) {
 			serial_print("Failed to get IMU acceleration");
 		}
 
-		if (read_gyro(gyro_data_temp)) {
+		if (gyro_read(gyro_data_temp)) {
 			serial_print("Failed to get IMU gyroscope");
 		}
 
@@ -198,7 +198,7 @@ void vTOFMonitor(void *pv_params)
 	int32_t range;
 
 	for (;;) {
-		if (read_distance(&range)) {
+		if (distance_read(&range)) {
 			serial_print("failed to read distance!");
 			continue;
 		}
@@ -238,7 +238,7 @@ void vShockpotMonitor(void *pv_params)
 	uint32_t shock_value = 0;
 
 	for (;;) {
-		read_shockpot(shock_value);
+		shockpot_read(shock_value);
 
 #ifdef LOG_VERBOSE
 		serial_print("Shock value:\t%d\r\n", shock_value);
@@ -281,8 +281,8 @@ void vStrainMonitor(void *pv_params)
 	uint32_t strain1_dat = 0;
 	uint32_t strain2_dat = 0;
 	for (;;) {
-		read_strain1(strain1_dat);
-		read_strain2(strain2_dat);
+		strain1_read(strain1_dat);
+		strain2_read(strain2_dat);
 
 #ifdef LOG_VERBOSE
 		serial_print("Strain 1: %d  2: %d \r\n", strain1_dat,

@@ -16,35 +16,35 @@ typedef enum {
 	DEVICE_BACK_LEFT,
 } device_loc_t;
 
-int8_t init_msb();
+int8_t msb_init();
 
 #ifdef SENSOR_TEMP
-int8_t measure_central_temp(uint16_t *temp, uint16_t *humidity);
+int8_t central_temp_measure(uint16_t *temp, uint16_t *humidity);
 #endif
 
 #ifdef SENSOR_IMU
-int8_t read_accel(uint16_t accel[3]);
+int8_t accel_read(uint16_t accel[3]);
 
-int8_t read_gyro(uint16_t gyro[3]);
+int8_t gyro_read(uint16_t gyro[3]);
 #endif
 
 #ifdef SENSOR_TOF
-int8_t read_distance(int32_t *range_mm);
+int8_t distance_read(int32_t *range_mm);
 #endif
 
-int8_t write_debug1(bool status);
+int8_t debug1_write(bool status);
 
-int8_t write_debug2(bool status);
+int8_t debug2_write(bool status);
 
-int8_t write_vcc5_en(bool status);
+int8_t vcc5_en_write(bool status);
 
 #ifdef SENSOR_SHOCKPOT
-void read_shockpot(uint32_t shockpot_sense);
+void shockpot_read(uint32_t shockpot_sense);
 #endif
 
 #ifdef SENSOR_STRAIN
-void read_strain1(uint32_t strain1);
-void read_strain2(uint32_t strain2);
+void strain1_read(uint32_t strain1);
+void strain2_read(uint32_t strain2);
 #endif
 
 #endif

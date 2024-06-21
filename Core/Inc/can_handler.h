@@ -24,6 +24,6 @@ extern osThreadId_t can_dispatch_handle;
 extern const osThreadAttr_t can_dispatch_attributes;
 
 int8_t queue_can_msg(can_msg_t msg);
-void init_can1();
+void can1_init();
 
 #endif

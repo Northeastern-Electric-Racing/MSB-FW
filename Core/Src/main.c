@@ -186,8 +186,8 @@ int main(void)
 
   // determine the configuration of the device
 
-  init_msb();
-  init_can1();
+  msb_init();
+  can1_init();
 
   /* USER CODE END RTOS_MUTEX */
 
@@ -414,7 +414,7 @@ static void MX_CAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
-  init_can1(&hcan1);
+  can1_init(&hcan1);
 
   /* USER CODE END CAN1_Init 2 */
 

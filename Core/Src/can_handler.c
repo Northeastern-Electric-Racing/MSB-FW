@@ -26,7 +26,7 @@ extern CAN_HandleTypeDef hcan1;
 
 can_t *can1;
 
-void init_can1()
+void can1_init()
 {
 	can1 = malloc(sizeof(can_t));
 	assert(can1);
