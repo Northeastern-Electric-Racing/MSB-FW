@@ -36,6 +36,5 @@
 #define SENSOR_IMU
 //#define SENSOR_WHEEL_TEMP
 
-
 // VERBOSE LOGGING
 #define LOG_VERBOSE
