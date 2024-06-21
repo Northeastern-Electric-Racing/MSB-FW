@@ -22,16 +22,16 @@
 #define CAN_MSG_QUEUE_SIZE 25 /* messages */
 static osMessageQueueId_t can_outbound_queue;
 
+extern CAN_HandleTypeDef hcan1;
+
 can_t *can1;
 
-void init_can1(CAN_HandleTypeDef *hcan)
+void init_can1()
 {
-	assert(hcan);
-
 	can1 = malloc(sizeof(can_t));
 	assert(can1);
 
-	can1->hcan = hcan;
+	can1->hcan = &hcan1;
 
 	assert(!can_init(can1));
 

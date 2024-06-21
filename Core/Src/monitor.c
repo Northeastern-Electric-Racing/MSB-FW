@@ -13,9 +13,11 @@
 
 #include "monitor.h"
 
-uint16_t convert_can(uint16_t original_value, device_loc_t *mode)
+extern device_loc_t device_loc;
+
+uint16_t convert_can(uint16_t original_value, device_loc_t mode)
 {
-	switch (*mode) {
+	switch (mode) {
 	case DEVICE_FRONT_LEFT:
 		return original_value;
 	case DEVICE_FRONT_RIGHT:
@@ -29,6 +31,7 @@ uint16_t convert_can(uint16_t original_value, device_loc_t *mode)
 	}
 }
 
+#ifdef SENSOR_TEMP
 osThreadId_t temp_monitor_handle;
 const osThreadAttr_t temp_monitor_attributes = {
 	.name = "TempMonitor",
@@ -38,10 +41,8 @@ const osThreadAttr_t temp_monitor_attributes = {
 
 void vTempMonitor(void *pv_params)
 {
-	msb_t *msb = (msb_t *)pv_params;
-
 	can_msg_t temp_sensor_msg = { .id = convert_can(CANID_TEMP_SENSOR,
-							msb->device_loc),
+							device_loc),
 				      .len = 4,
 				      .data = { 0 } };
 
@@ -54,7 +55,7 @@ void vTempMonitor(void *pv_params)
 	uint16_t humidity_dat = 0;
 
 	for (;;) {
-		if (measure_central_temp(msb, &temp_dat, &humidity_dat)) {
+		if (measure_central_temp(&temp_dat, &humidity_dat)) {
 			printf("Failed to get temp");
 		}
 
@@ -84,7 +85,9 @@ void vTempMonitor(void *pv_params)
 		osDelay(DELAY_TEMP_SENSOR_REFRESH);
 	}
 }
+#endif
 
+#ifdef SENSOR_IMU
 osThreadId_t imu_monitor_handle;
 const osThreadAttr_t imu_monitor_attributes = {
 	.name = "IMUMonitor",
@@ -94,15 +97,13 @@ const osThreadAttr_t imu_monitor_attributes = {
 
 void vIMUMonitor(void *pv_params)
 {
-	msb_t *msb = (msb_t *)pv_params;
-
 	const uint8_t num_samples = 10;
 	can_msg_t imu_accel_msg = { .id = convert_can(CANID_IMU_ACCEL,
-						      msb->device_loc),
+						      device_loc),
 				    .len = 6,
 				    .data = { 0 } };
 	can_msg_t imu_gyro_msg = { .id = convert_can(CANID_IMU_GYRO,
-						     msb->device_loc),
+						     device_loc),
 				   .len = 6,
 				   .data = { 0 } };
 
@@ -124,11 +125,11 @@ void vIMUMonitor(void *pv_params)
 	for (;;) {
 		/* Take measurement */
 
-		if (read_accel(msb, accel_data_temp)) {
+		if (read_accel(accel_data_temp)) {
 			serial_print("Failed to get IMU acceleration");
 		}
 
-		if (read_gyro(msb, gyro_data_temp)) {
+		if (read_gyro(gyro_data_temp)) {
 			serial_print("Failed to get IMU gyroscope");
 		}
 
@@ -178,7 +179,9 @@ void vIMUMonitor(void *pv_params)
 		osDelay(DELAY_IMU_REFRESH);
 	}
 }
+#endif
 
+#ifdef SENSOR_TOF
 osThreadId_t tof_monitor_handle;
 const osThreadAttr_t tof_monitor_attributes = {
 	.name = "TOFMonitor",
@@ -188,16 +191,14 @@ const osThreadAttr_t tof_monitor_attributes = {
 
 void vTOFMonitor(void *pv_params)
 {
-	msb_t *msb = (msb_t *)pv_params;
-
-	can_msg_t range_msg = { .id = convert_can(CANID_TOF, msb->device_loc),
+	can_msg_t range_msg = { .id = convert_can(CANID_TOF, device_loc),
 				.len = 4,
 				.data = { 0 } };
 
 	int32_t range;
 
 	for (;;) {
-		if (read_distance(msb, &range)) {
+		if (read_distance(&range)) {
 			serial_print("failed to read distance!");
 			continue;
 		}
@@ -217,7 +218,9 @@ void vTOFMonitor(void *pv_params)
 		osDelay(DELAY_TOF_REFRESH);
 	}
 }
+#endif
 
+#ifdef SENSOR_SHOCKPOT
 osThreadId_t shockpot_monitor_handle;
 const osThreadAttr_t shockpot_monitor_attributes = {
 	.name = "ShockpotMonitor",
@@ -227,17 +230,15 @@ const osThreadAttr_t shockpot_monitor_attributes = {
 
 void vShockpotMonitor(void *pv_params)
 {
-	msb_t *msb = (msb_t *)pv_params;
-
 	can_msg_t shockpot_msg = { .id = convert_can(CANID_SHOCK_SENSE,
-						     msb->device_loc),
+						     device_loc),
 				   .len = 4,
 				   .data = { 0 } };
 
 	uint32_t shock_value = 0;
 
 	for (;;) {
-		read_shockpot(msb, shock_value);
+		read_shockpot(shock_value);
 
 #ifdef LOG_VERBOSE
 		serial_print("Shock value:\t%d\r\n", shock_value);
@@ -255,7 +256,9 @@ void vShockpotMonitor(void *pv_params)
 		osDelay(DELAY_SHOCKPOT_REFRESH);
 	}
 }
+#endif
 
+#ifdef SENSOR_STRAIN
 osThreadId_t strain_monitor_handle;
 const osThreadAttr_t strain_monitor_attributes = {
 	.name = "StrainMonitor",
@@ -265,10 +268,8 @@ const osThreadAttr_t strain_monitor_attributes = {
 
 void vStrainMonitor(void *pv_params)
 {
-	msb_t *msb = (msb_t *)pv_params;
-
 	can_msg_t strain_msg = { .id = convert_can(CANID_STRAIN_SENSE,
-						   msb->device_loc),
+						   device_loc),
 				 .len = 8,
 				 .data = { 0 } };
 
@@ -280,8 +281,8 @@ void vStrainMonitor(void *pv_params)
 	uint32_t strain1_dat = 0;
 	uint32_t strain2_dat = 0;
 	for (;;) {
-		read_strain1(msb, strain1_dat);
-		read_strain2(msb, strain2_dat);
+		read_strain1(strain1_dat);
+		read_strain2(strain2_dat);
 
 #ifdef LOG_VERBOSE
 		serial_print("Strain 1: %d  2: %d \r\n", strain1_dat,
@@ -304,3 +305,4 @@ void vStrainMonitor(void *pv_params)
 		osDelay(DELAY_SHOCKPOT_REFRESH);
 	}
 }
+#endif
