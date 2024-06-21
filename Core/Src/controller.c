@@ -2,6 +2,8 @@
 #include "msb.h"
 #include "msb_conf.h"
 
+extern device_loc_t device_loc;
+
 osThreadId_t led_controller_handle;
 const osThreadAttr_t led_controller_attributes = {
 	.name = "LedController",
@@ -11,24 +13,22 @@ const osThreadAttr_t led_controller_attributes = {
 
 void vLedController(void *pv_params)
 {
-	msb_t *msb = (msb_t *)pv_params;
-
-	switch (*msb->device_loc) {
+	switch (device_loc) {
 	case DEVICE_FRONT_LEFT:
-		write_debug1(msb, true);
-		write_debug2(msb, true);
+		debug1_write(true);
+		debug2_write(true);
 		break;
 	case DEVICE_FRONT_RIGHT:
-		write_debug1(msb, true);
-		write_debug2(msb, false);
+		debug1_write(true);
+		debug2_write(false);
 		break;
 	case DEVICE_BACK_LEFT:
-		write_debug1(msb, false);
-		write_debug2(msb, true);
+		debug1_write(false);
+		debug2_write(true);
 		break;
 	case DEVICE_BACK_RIGHT:
-		write_debug1(msb, false);
-		write_debug2(msb, false);
+		debug1_write(false);
+		debug2_write(false);
 		break;
 	}
 
