@@ -50,9 +50,9 @@ const osThreadAttr_t can_dispatch_attributes = {
 void vCanDispatch(void *pv_params)
 {
 	can_msg_t msg_from_queue;
-	#ifdef CAN_ENABLE
+#ifdef CAN_ENABLE
 	HAL_StatusTypeDef msg_status;
-	#endif
+#endif
 
 	for (;;) {
 		/* Send CAN message */

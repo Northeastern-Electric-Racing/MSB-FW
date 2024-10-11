@@ -62,10 +62,8 @@ void vTempMonitor(void *pv_params)
 		temp_sensor_data.humidity = humidity_dat;
 
 #ifdef LOG_VERBOSE
-		printf("Board Temperature:\t%d\r\n",
-			     temp_sensor_data.temp);
-		printf("Board Humidity:\t%d\r\n",
-			     temp_sensor_data.humidity);
+		printf("Board Temperature:\t%d\r\n", temp_sensor_data.temp);
+		printf("Board Humidity:\t%d\r\n", temp_sensor_data.humidity);
 #endif
 
 		endian_swap(&temp_sensor_data.temp,
@@ -133,26 +131,18 @@ void vIMUMonitor(void *pv_params)
 		}
 
 		/* Run values through LPF of sample size  */
-		accel_data.accel_x =
-			(accel_data.accel_x + accel_data_temp[0]);
-		accel_data.accel_y =
-			(accel_data.accel_y + accel_data_temp[1]);
-		accel_data.accel_z =
-			(accel_data.accel_z + accel_data_temp[2]);
-		gyro_data.gyro_x =
-			(gyro_data.gyro_x + gyro_data_temp[0]);
-		gyro_data.gyro_y =
-			(gyro_data.gyro_y + gyro_data_temp[1]);
-		gyro_data.gyro_z =
-			(gyro_data.gyro_z + gyro_data_temp[2]);
+		accel_data.accel_x = (accel_data.accel_x + accel_data_temp[0]);
+		accel_data.accel_y = (accel_data.accel_y + accel_data_temp[1]);
+		accel_data.accel_z = (accel_data.accel_z + accel_data_temp[2]);
+		gyro_data.gyro_x = (gyro_data.gyro_x + gyro_data_temp[0]);
+		gyro_data.gyro_y = (gyro_data.gyro_y + gyro_data_temp[1]);
+		gyro_data.gyro_z = (gyro_data.gyro_z + gyro_data_temp[2]);
 
 #ifdef LOG_VERBOSE
-		printf("IMU Accel x: %d y: %d z: %d \r\n",
-			     accel_data.accel_x, accel_data.accel_y,
-			     accel_data.accel_z);
-		printf("IMU Gyro x: %d y: %d z: %d \r\n",
-			     gyro_data.gyro_x, gyro_data.gyro_y,
-			     gyro_data.gyro_z);
+		printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,
+		       accel_data.accel_y, accel_data.accel_z);
+		printf("IMU Gyro x: %d y: %d z: %d \r\n", gyro_data.gyro_x,
+		       gyro_data.gyro_y, gyro_data.gyro_z);
 #endif
 
 		/* convert to big endian */
@@ -284,8 +274,7 @@ void vStrainMonitor(void *pv_params)
 		strain2_read(strain2_dat);
 
 #ifdef LOG_VERBOSE
-		printf("Strain 1: %ld  2: %ld \r\n", strain1_dat,
-			     strain2_dat);
+		printf("Strain 1: %ld  2: %ld \r\n", strain1_dat, strain2_dat);
 #endif
 
 		strain_data.strain1 = strain1_dat;
