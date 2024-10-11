@@ -13,7 +13,7 @@
 // CONTROLLER
 #define DELAY_DEBUG_LED_REFRESH 250
 
-#define DELAY_CAN_DISPATCH 5
+#define DELAY_CAN_DISPATCH 2
 
 // CAN IDS
 #define CANID_TEMP_SENSOR  0x602
@@ -26,14 +26,17 @@
 
 // Sensors to use, comment out to disable
 
+// internal
+//#define CAN_ENABLE
+
 //on central
-#define SENSOR_TEMP
+//#define SENSOR_TEMP
 #define SENSOR_SHOCKPOT
 #define SENSOR_STRAIN
-#define SENSOR_TOF
+//#define SENSOR_TOF
 
+//#define SENSOR_IMU
 // on knuckle or wheel
-#define SENSOR_IMU
 //#define SENSOR_WHEEL_TEMP
 
 // VERBOSE LOGGING

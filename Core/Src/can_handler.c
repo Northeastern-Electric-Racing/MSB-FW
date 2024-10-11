@@ -12,7 +12,6 @@
 #include "can_handler.h"
 #include "can.h"
 #include "msb_conf.h"
-#include "serial_monitor.h"
 
 #include "stdio.h"
 #include <assert.h>
@@ -28,12 +27,14 @@ can_t *can1;
 
 void can1_init()
 {
+#ifdef CAN_ENABLE
 	can1 = malloc(sizeof(can_t));
 	assert(can1);
 
 	can1->hcan = &hcan1;
 
 	assert(!can_init(can1));
+#endif
 
 	can_outbound_queue =
 		osMessageQueueNew(CAN_MSG_QUEUE_SIZE, sizeof(can_msg_t), NULL);
@@ -49,24 +50,25 @@ const osThreadAttr_t can_dispatch_attributes = {
 void vCanDispatch(void *pv_params)
 {
 	can_msg_t msg_from_queue;
+	#ifdef CAN_ENABLE
 	HAL_StatusTypeDef msg_status;
+	#endif
 
 	for (;;) {
 		/* Send CAN message */
 		if (osOK == osMessageQueueGet(can_outbound_queue,
 					      &msg_from_queue, NULL,
 					      osWaitForever)) {
+#ifdef CAN_ENABLE
 			msg_status = can_send_msg(can1, &msg_from_queue);
 			if (msg_status == HAL_ERROR) {
-				serial_print("Failed to send CAN message");
+				printf("Failed to send CAN message");
 			} else if (msg_status == HAL_BUSY) {
-				serial_print("Outbound mailbox full!");
+				printf("Outbound mailbox full!");
 			}
+#endif
 #ifdef LOG_VERBOSE
-			else {
-				printf("Message sent: %lX\r\n",
-				       msg_from_queue.id);
-			}
+			printf("Message sent att: %lX\r\n", msg_from_queue.id);
 #endif
 		}
 

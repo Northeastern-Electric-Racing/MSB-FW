@@ -4,7 +4,6 @@
 #include "cmsis_os.h"
 #include "msb.h"
 #include "msb_conf.h"
-#include "serial_monitor.h"
 
 #include "stm32f405xx.h"
 #include <stdio.h>
@@ -35,7 +34,7 @@ uint16_t convert_can(uint16_t original_value, device_loc_t mode)
 osThreadId_t temp_monitor_handle;
 const osThreadAttr_t temp_monitor_attributes = {
 	.name = "TempMonitor",
-	.stack_size = 32 * 8,
+	.stack_size = 64 * 8,
 	.priority = (osPriority_t)osPriorityHigh1,
 };
 
@@ -56,16 +55,16 @@ void vTempMonitor(void *pv_params)
 
 	for (;;) {
 		if (central_temp_measure(&temp_dat, &humidity_dat)) {
-			printf("Failed to get temp");
+			printf("Failed to get temp\r\n");
 		}
 
 		temp_sensor_data.temp = temp_dat;
 		temp_sensor_data.humidity = humidity_dat;
 
 #ifdef LOG_VERBOSE
-		serial_print("Board Temperature:\t%d\r\n",
+		printf("Board Temperature:\t%d\r\n",
 			     temp_sensor_data.temp);
-		serial_print("Board Humidity:\t%d\r\n",
+		printf("Board Humidity:\t%d\r\n",
 			     temp_sensor_data.humidity);
 #endif
 
@@ -78,7 +77,7 @@ void vTempMonitor(void *pv_params)
 		       temp_sensor_msg.len);
 		/* Send CAN message */
 		if (queue_can_msg(temp_sensor_msg)) {
-			serial_print("Failed to send CAN message");
+			printf("Failed to send CAN message\r\n");
 		}
 
 		/* Yield to other tasks */
@@ -91,13 +90,13 @@ void vTempMonitor(void *pv_params)
 osThreadId_t imu_monitor_handle;
 const osThreadAttr_t imu_monitor_attributes = {
 	.name = "IMUMonitor",
-	.stack_size = 32 * 8,
+	.stack_size = 64 * 8,
 	.priority = (osPriority_t)osPriorityHigh,
 };
 
 void vIMUMonitor(void *pv_params)
 {
-	const uint8_t num_samples = 10;
+	//const uint8_t num_samples = 10;
 	can_msg_t imu_accel_msg = { .id = convert_can(CANID_IMU_ACCEL,
 						      device_loc),
 				    .len = 6,
@@ -126,32 +125,32 @@ void vIMUMonitor(void *pv_params)
 		/* Take measurement */
 
 		if (accel_read(accel_data_temp)) {
-			serial_print("Failed to get IMU acceleration");
+			printf("Failed to get IMU acceleration\r\n");
 		}
 
 		if (gyro_read(gyro_data_temp)) {
-			serial_print("Failed to get IMU gyroscope");
+			printf("Failed to get IMU gyroscope\r\n");
 		}
 
 		/* Run values through LPF of sample size  */
 		accel_data.accel_x =
-			(accel_data.accel_x + accel_data_temp[0]) / num_samples;
+			(accel_data.accel_x + accel_data_temp[0]);
 		accel_data.accel_y =
-			(accel_data.accel_y + accel_data_temp[1]) / num_samples;
+			(accel_data.accel_y + accel_data_temp[1]);
 		accel_data.accel_z =
-			(accel_data.accel_z + accel_data_temp[2]) / num_samples;
+			(accel_data.accel_z + accel_data_temp[2]);
 		gyro_data.gyro_x =
-			(gyro_data.gyro_x + gyro_data_temp[0]) / num_samples;
+			(gyro_data.gyro_x + gyro_data_temp[0]);
 		gyro_data.gyro_y =
-			(gyro_data.gyro_y + gyro_data_temp[1]) / num_samples;
+			(gyro_data.gyro_y + gyro_data_temp[1]);
 		gyro_data.gyro_z =
-			(gyro_data.gyro_z + gyro_data_temp[2]) / num_samples;
+			(gyro_data.gyro_z + gyro_data_temp[2]);
 
 #ifdef LOG_VERBOSE
-		serial_print("IMU Accel x: %d y: %d z: %d \r\n",
+		printf("IMU Accel x: %d y: %d z: %d \r\n",
 			     accel_data.accel_x, accel_data.accel_y,
 			     accel_data.accel_z);
-		serial_print("IMU Gyro x: %d y: %d z: %d \r\n",
+		printf("IMU Gyro x: %d y: %d z: %d \r\n",
 			     gyro_data.gyro_x, gyro_data.gyro_y,
 			     gyro_data.gyro_z);
 #endif
@@ -167,12 +166,12 @@ void vIMUMonitor(void *pv_params)
 		/* Send CAN message */
 		memcpy(imu_accel_msg.data, &accel_data, imu_accel_msg.len);
 		if (queue_can_msg(imu_accel_msg)) {
-			serial_print("Failed to send CAN message");
+			printf("Failed to send CAN message\r\n");
 		}
 
 		memcpy(imu_gyro_msg.data, &gyro_data, imu_gyro_msg.len);
 		if (queue_can_msg(imu_gyro_msg)) {
-			serial_print("Failed to send CAN message");
+			printf("Failed to send CAN message\r\n");
 		}
 
 		/* Yield to other tasks */
@@ -185,7 +184,7 @@ void vIMUMonitor(void *pv_params)
 osThreadId_t tof_monitor_handle;
 const osThreadAttr_t tof_monitor_attributes = {
 	.name = "TOFMonitor",
-	.stack_size = 32 * 8,
+	.stack_size = 128 * 8,
 	.priority = (osPriority_t)osPriorityHigh,
 };
 
@@ -199,12 +198,12 @@ void vTOFMonitor(void *pv_params)
 
 	for (;;) {
 		if (distance_read(&range)) {
-			serial_print("failed to read distance!");
+			printf("failed to read distance!\r\n");
 			continue;
 		}
 
 #ifdef LOG_VERBOSE
-		serial_print("Range is: %d", range);
+		printf("Range is: %ld\r\n", range);
 #endif
 
 		endian_swap(&range, sizeof(range));
@@ -212,7 +211,7 @@ void vTOFMonitor(void *pv_params)
 		memcpy(range_msg.data, &range, range_msg.len);
 		/* Send CAN message */
 		if (queue_can_msg(range_msg)) {
-			serial_print("Failed to send CAN message");
+			printf("Failed to send CAN message\r\n");
 		}
 
 		osDelay(DELAY_TOF_REFRESH);
@@ -224,7 +223,7 @@ void vTOFMonitor(void *pv_params)
 osThreadId_t shockpot_monitor_handle;
 const osThreadAttr_t shockpot_monitor_attributes = {
 	.name = "ShockpotMonitor",
-	.stack_size = 32 * 8,
+	.stack_size = 64 * 8,
 	.priority = (osPriority_t)osPriorityHigh1,
 };
 
@@ -241,7 +240,7 @@ void vShockpotMonitor(void *pv_params)
 		shockpot_read(shock_value);
 
 #ifdef LOG_VERBOSE
-		serial_print("Shock value:\t%d\r\n", shock_value);
+		printf("Shock value:\t%ld\r\n", shock_value);
 #endif
 
 		endian_swap(&shock_value, sizeof(shock_value));
@@ -249,7 +248,7 @@ void vShockpotMonitor(void *pv_params)
 		memcpy(shockpot_msg.data, &shock_value, shockpot_msg.len);
 		/* Send CAN message */
 		if (queue_can_msg(shockpot_msg)) {
-			serial_print("Failed to send CAN message");
+			printf("Failed to send CAN message\r\n");
 		}
 
 		/* Yield to other tasks */
@@ -262,7 +261,7 @@ void vShockpotMonitor(void *pv_params)
 osThreadId_t strain_monitor_handle;
 const osThreadAttr_t strain_monitor_attributes = {
 	.name = "StrainMonitor",
-	.stack_size = 32 * 8,
+	.stack_size = 64 * 8,
 	.priority = (osPriority_t)osPriorityHigh1,
 };
 
@@ -285,7 +284,7 @@ void vStrainMonitor(void *pv_params)
 		strain2_read(strain2_dat);
 
 #ifdef LOG_VERBOSE
-		serial_print("Strain 1: %d  2: %d \r\n", strain1_dat,
+		printf("Strain 1: %ld  2: %ld \r\n", strain1_dat,
 			     strain2_dat);
 #endif
 
@@ -298,7 +297,7 @@ void vStrainMonitor(void *pv_params)
 		memcpy(strain_msg.data, &strain_data, strain_msg.len);
 		/* Send CAN message */
 		if (queue_can_msg(strain_msg)) {
-			serial_print("Failed to send CAN message");
+			printf("Failed to send CAN message");
 		}
 
 		/* Yield to other tasks */
