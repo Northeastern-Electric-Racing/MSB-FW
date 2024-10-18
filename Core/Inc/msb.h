@@ -7,6 +7,7 @@
 #include "sht30.h"
 #include "stm32f405xx.h"
 #include "vl6180x_api.h"
+#include "vl6180x_platform.h"
 #include "msb_conf.h"
 
 typedef enum {
