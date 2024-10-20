@@ -14,6 +14,24 @@ extern device_loc_t device_loc;
 
 osMutexId_t i2c_mutex;
 
+// reads imu reg
+static inline int read_reg(uint8_t *data,
+						   uint8_t reg,
+						   uint8_t length) {
+
+  return HAL_I2C_Mem_Read(&hi2c3, LSM6DSO_I2C_ADDRESS, reg,
+                          I2C_MEMADD_SIZE_8BIT, data, length, HAL_MAX_DELAY);
+}
+
+// read imu write
+static inline int write_reg(uint8_t *data,
+							uint8_t reg,
+							uint8_t length) {
+  
+  return HAL_I2C_Mem_Write(&hi2c3, LSM6DSO_I2C_ADDRESS, reg,
+                           I2C_MEMADD_SIZE_8BIT, data, length, HAL_MAX_DELAY);
+}
+
 #ifdef SENSOR_TEMP
 sht30_t temp_sensor;
 #endif
@@ -41,9 +59,10 @@ int8_t msb_init()
 #endif
 
 #ifdef SENSOR_IMU
+	
 	/* Initialize the IMU */
-	imu = (lsm6dso_t){ .i2c_handle = &hi2c3 };
-	assert(!lsm6dso_init(&imu, &hi2c3)); /* This is always connected */
+	lsm6dso_t imu;
+	assert(!lsm6dso_init(&imu, read_reg, write_reg)); /* This is always connected */
 #endif
 
 #ifdef SENSOR_TOF
