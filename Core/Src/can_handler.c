@@ -61,7 +61,7 @@ void vCanDispatch(void *pv_params)
 					      osWaitForever)) {
 #ifdef CAN_ENABLE
 			msg_status = can_send_msg(can1, &msg_from_queue);
-			if (msg_status == HAL_ERROR) {
+			if (msg_status != HAL_OK) {
 				printf("Failed to send CAN message");
 			} else if (msg_status == HAL_BUSY) {
 				printf("Outbound mailbox full!");
@@ -72,7 +72,7 @@ void vCanDispatch(void *pv_params)
 #endif
 		}
 
-		osDelay(DELAY_CAN_DISPATCH);
+		//osDelay(DELAY_CAN_DISPATCH);
 	}
 }
 

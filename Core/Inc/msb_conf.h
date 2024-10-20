@@ -27,16 +27,16 @@
 // Sensors to use, comment out to disable
 
 // internal
-//#define CAN_ENABLE
+#define CAN_ENABLE
 
 //on central
-//#define SENSOR_TEMP
+#define SENSOR_TEMP
 #define SENSOR_SHOCKPOT
 #define SENSOR_STRAIN
 //#define SENSOR_TOF
 
-//#define SENSOR_IMU
-// on knuckle or wheel
+#define SENSOR_IMU
+// on knuckle or /wheel
 //#define SENSOR_WHEEL_TEMP
 
 // VERBOSE LOGGING
