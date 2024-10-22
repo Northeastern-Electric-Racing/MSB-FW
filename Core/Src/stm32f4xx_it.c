@@ -86,11 +86,24 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+    // this is an ISR where the MCU doesnt have an intact stack frame or peripherals, so its ok to f around
+    // no sleep exists in an ISR, for good reason
+    volatile uint32_t i = 0;
+    while (i < 120000) {
+      i += 1;
+    }
+    HAL_GPIO_WritePin(Debug_LED_1_GPIO_Port, Debug_LED_1_Pin, 0);
+    HAL_GPIO_WritePin(Debug_LED_2_GPIO_Port, Debug_LED_2_Pin, 0);
+    i = 0;
+    while (i < 120000) {
+      i += 1;
+    }
+    HAL_GPIO_WritePin(Debug_LED_1_GPIO_Port, Debug_LED_1_Pin, 1);
+    HAL_GPIO_WritePin(Debug_LED_2_GPIO_Port, Debug_LED_2_Pin, 1);
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
