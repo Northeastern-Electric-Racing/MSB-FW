@@ -15,7 +15,7 @@ extern device_loc_t device_loc;
 osMutexId_t i2c_mutex;
 
 // reads imu reg
-static inline int read_reg(uint8_t *data,
+static inline int imu_read_reg(uint8_t *data,
 						   uint8_t reg,
 						   uint8_t length) {
 
@@ -23,8 +23,8 @@ static inline int read_reg(uint8_t *data,
                           I2C_MEMADD_SIZE_8BIT, data, length, HAL_MAX_DELAY);
 }
 
-// read imu write
-static inline int write_reg(uint8_t *data,
+// read imu write	
+static inline int imu_write_reg(uint8_t *data,
 							uint8_t reg,
 							uint8_t length) {
   
@@ -61,8 +61,7 @@ int8_t msb_init()
 #ifdef SENSOR_IMU
 	
 	/* Initialize the IMU */
-	lsm6dso_t imu;
-	assert(!lsm6dso_init(&imu, read_reg, write_reg)); /* This is always connected */
+	assert(!lsm6dso_init(&imu, imu_read_reg, imu_write_reg)); /* This is always connected */
 #endif
 
 #ifdef SENSOR_TOF
