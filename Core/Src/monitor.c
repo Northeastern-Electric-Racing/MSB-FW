@@ -34,7 +34,7 @@ uint16_t convert_can(uint16_t original_value, device_loc_t mode)
 osThreadId_t temp_monitor_handle;
 const osThreadAttr_t temp_monitor_attributes = {
 	.name = "TempMonitor",
-	.stack_size = 64 * 8,
+	.stack_size = 64 * 16,
 	.priority = (osPriority_t)osPriorityHigh1,
 };
 
