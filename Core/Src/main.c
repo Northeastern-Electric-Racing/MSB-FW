@@ -24,11 +24,11 @@
 /* USER CODE BEGIN Includes */
 #include "can_handler.h"
 #include "controller.h"
-#include "serial_monitor.h"
 #include "monitor.h"
 #include "msb.h"
 #include "msb_conf.h"
 #include "assert.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -150,6 +150,7 @@ int main(void)
   MX_SPI2_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  printf("INIT MSB... FINDING ID");
   // determine MSB location
   bool loc1 = HAL_GPIO_ReadPin(Addr0_GPIO_Port, Addr0_Pin);
   bool loc2 = HAL_GPIO_ReadPin(Addr1_GPIO_Port, Addr1_Pin);
@@ -175,6 +176,7 @@ int main(void)
   {
     device_loc = DEVICE_FRONT_LEFT;
   }
+
 
   /* USER CODE END 2 */
 
@@ -203,8 +205,6 @@ int main(void)
   /* add queues, ... */
   can_dispatch_handle = osThreadNew(vCanDispatch, NULL, &can_dispatch_attributes);
   assert(can_dispatch_handle);
-  serial_monitor_handle = osThreadNew(vSerialMonitor, NULL, &serial_monitor_attributes);
-  assert(serial_monitor_handle);
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -224,17 +224,17 @@ int main(void)
   #endif
 
   #ifdef SENSOR_TOF
-  tof_monitor_handle = osThreadNew(vIMUMonitor, NULL, &tof_monitor_attributes);
+  tof_monitor_handle = osThreadNew(vTOFMonitor, NULL, &tof_monitor_attributes);
   assert(tof_monitor_handle);
   #endif
 
   #ifdef SENSOR_SHOCKPOT
-  shockpot_monitor_handle = osThreadNew(vIMUMonitor, NULL, &shockpot_monitor_attributes);
+  shockpot_monitor_handle = osThreadNew(vShockpotMonitor, NULL, &shockpot_monitor_attributes);
   assert(shockpot_monitor_handle);
   #endif
 
   #ifdef SENSOR_STRAIN
-  strain_monitor_handle = osThreadNew(vIMUMonitor, NULL, &strain_monitor_attributes);
+  strain_monitor_handle = osThreadNew(vStrainMonitor, NULL, &strain_monitor_attributes);
   assert(strain_monitor_handle);
   #endif
 
@@ -398,7 +398,7 @@ static void MX_CAN1_Init(void)
 
   /* USER CODE END CAN1_Init 1 */
   hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 1;
+  hcan1.Init.Prescaler = 2;
   hcan1.Init.Mode = CAN_MODE_NORMAL;
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan1.Init.TimeSeg1 = CAN_BS1_13TQ;
@@ -414,7 +414,6 @@ static void MX_CAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
-  can1_init(&hcan1);
 
   /* USER CODE END CAN1_Init 2 */
 
@@ -620,11 +619,19 @@ static void MX_GPIO_Init(void)
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
+  uint8_t i = 0;
+  printf("Init MSB default task...\r\n");
   /* Infinite loop */
   for (;;)
   {
     /* Pet watchdog, will reset after 4ish seconds */
     HAL_IWDG_Refresh(&hiwdg);
+    if (i % 2 == 0) {
+          printf("MSB TYPE: %d\r\n", device_loc);
+    } else {
+        printf("..\r\n");
+    }
+    i++;
     osDelay(500);
   }
   /* USER CODE END 5 */
@@ -662,6 +669,7 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
+    printf("Error Hanlder HIT!\r\n");
   }
   /* USER CODE END Error_Handler_Debug */
 }
@@ -677,8 +685,8 @@ void Error_Handler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* User can add his own implementation to report the file name and line number, */
+  printf("Param Assert failed: file %s on line %ld\r\n", file, line);
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

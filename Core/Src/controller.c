@@ -13,26 +13,49 @@ const osThreadAttr_t led_controller_attributes = {
 
 void vLedController(void *pv_params)
 {
-	switch (device_loc) {
-	case DEVICE_FRONT_LEFT:
-		debug1_write(true);
-		debug2_write(true);
-		break;
-	case DEVICE_FRONT_RIGHT:
-		debug1_write(true);
-		debug2_write(false);
-		break;
-	case DEVICE_BACK_LEFT:
-		debug1_write(false);
-		debug2_write(true);
-		break;
-	case DEVICE_BACK_RIGHT:
-		debug1_write(false);
-		debug2_write(false);
-		break;
-	}
-
+	uint8_t i = 0;
 	for (;;) {
+		if (i % 8 == 0) {
+			// occassionally oposing blink
+			switch (device_loc) {
+			case DEVICE_FRONT_LEFT:
+				debug1_write(false);
+				debug2_write(false);
+				break;
+			case DEVICE_FRONT_RIGHT:
+				debug1_write(false);
+				debug2_write(true);
+				break;
+			case DEVICE_BACK_LEFT:
+				debug1_write(true);
+				debug2_write(false);
+				break;
+			case DEVICE_BACK_RIGHT:
+				debug1_write(true);
+				debug2_write(true);
+				break;
+			}
+		} else {
+			switch (device_loc) {
+			case DEVICE_FRONT_LEFT:
+				debug1_write(true);
+				debug2_write(true);
+				break;
+			case DEVICE_FRONT_RIGHT:
+				debug1_write(true);
+				debug2_write(false);
+				break;
+			case DEVICE_BACK_LEFT:
+				debug1_write(false);
+				debug2_write(true);
+				break;
+			case DEVICE_BACK_RIGHT:
+				debug1_write(false);
+				debug2_write(false);
+				break;
+			}
+		}
+		i++;
 		osDelay(DELAY_DEBUG_LED_REFRESH);
 	}
 }

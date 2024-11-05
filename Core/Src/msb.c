@@ -2,9 +2,9 @@
 #include "main.h"
 #include "lsm6dso.h"
 #include <assert.h>
-#include <serial_monitor.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 static osMutexAttr_t msb_i2c_mutex_attr;
 
@@ -13,6 +13,22 @@ extern ADC_HandleTypeDef hadc1;
 extern device_loc_t device_loc;
 
 osMutexId_t i2c_mutex;
+
+// reads imu reg
+static inline int imu_read_reg(uint8_t *data, uint8_t reg, uint8_t length)
+{
+	return HAL_I2C_Mem_Read(&hi2c3, LSM6DSO_I2C_ADDRESS, reg,
+				I2C_MEMADD_SIZE_8BIT, data, length,
+				HAL_MAX_DELAY);
+}
+
+// read imu write
+static inline int imu_write_reg(uint8_t *data, uint8_t reg, uint8_t length)
+{
+	return HAL_I2C_Mem_Write(&hi2c3, LSM6DSO_I2C_ADDRESS, reg,
+				 I2C_MEMADD_SIZE_8BIT, data, length,
+				 HAL_MAX_DELAY);
+}
 
 #ifdef SENSOR_TEMP
 sht30_t temp_sensor;
@@ -42,16 +58,19 @@ int8_t msb_init()
 
 #ifdef SENSOR_IMU
 	/* Initialize the IMU */
-	imu = (lsm6dso_t){
-
-	};
-	assert(!lsm6dso_init(&imu, &hi2c3)); /* This is always connected */
+	assert(!lsm6dso_init(&imu, imu_read_reg,
+			     imu_write_reg)); /* This is always connected */
 #endif
 
 #ifdef SENSOR_TOF
 	/* Initialize the ToF sensor */
-	tof = malloc(sizeof(VL6180xDev_t));
+	struct MyDev_t tof_get = {
+		.i2c_bus_num = 0x29 << 1,
+		.i2c_handle = &hi2c3,
+	};
+	tof = &tof_get;
 	assert(tof);
+	osDelay(1);
 	assert(!VL6180x_WaitDeviceBooted(tof));
 	assert(!VL6180x_InitData(tof));
 	assert(!VL6180x_Prepare(tof));
@@ -162,9 +181,8 @@ int8_t distance_read(int32_t *range_mm)
 
 	VL6180x_RangePollMeasurement(tof, range);
 	if (range->errorStatus) {
-		serial_print(
-			"Error in range %f",
-			VL6180x_RangeGetStatusErrString(range->errorStatus));
+		printf("Error in range %s\r\n",
+		       VL6180x_RangeGetStatusErrString(range->errorStatus));
 		return range->errorStatus;
 	}
 

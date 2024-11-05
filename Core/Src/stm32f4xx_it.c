@@ -56,7 +56,6 @@
 
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_adc1;
-extern CAN_HandleTypeDef hcan1;
 extern TIM_HandleTypeDef htim5;
 
 /* USER CODE BEGIN EV */
@@ -87,11 +86,24 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+    // this is an ISR where the MCU doesnt have an intact stack frame or peripherals, so its ok to f around
+    // no sleep exists in an ISR, for good reason
+    volatile uint32_t i = 0;
+    while (i < 120000) {
+      i += 1;
+    }
+    HAL_GPIO_WritePin(Debug_LED_1_GPIO_Port, Debug_LED_1_Pin, 0);
+    HAL_GPIO_WritePin(Debug_LED_2_GPIO_Port, Debug_LED_2_Pin, 0);
+    i = 0;
+    while (i < 120000) {
+      i += 1;
+    }
+    HAL_GPIO_WritePin(Debug_LED_1_GPIO_Port, Debug_LED_1_Pin, 1);
+    HAL_GPIO_WritePin(Debug_LED_2_GPIO_Port, Debug_LED_2_Pin, 1);
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
@@ -160,20 +172,6 @@ void DebugMon_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32f4xx.s).                    */
 /******************************************************************************/
-
-/**
-  * @brief This function handles CAN1 RX0 interrupts.
-  */
-void CAN1_RX0_IRQHandler(void)
-{
-  /* USER CODE BEGIN CAN1_RX0_IRQn 0 */
-
-  /* USER CODE END CAN1_RX0_IRQn 0 */
-  HAL_CAN_IRQHandler(&hcan1);
-  /* USER CODE BEGIN CAN1_RX0_IRQn 1 */
-
-  /* USER CODE END CAN1_RX0_IRQn 1 */
-}
 
 /**
   * @brief This function handles TIM5 global interrupt.
