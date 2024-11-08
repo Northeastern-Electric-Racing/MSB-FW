@@ -21,7 +21,7 @@
 #define CAN_MSG_QUEUE_SIZE 25 /* messages */
 static osMessageQueueId_t can_outbound_queue;
 
-static uint32_t  id_list[4] = { 0x000, 0x000, 0x000, 0x002 };
+static uint32_t id_list[4] = { 0x000, 0x000, 0x000, 0x002 };
 
 extern CAN_HandleTypeDef hcan1;
 
