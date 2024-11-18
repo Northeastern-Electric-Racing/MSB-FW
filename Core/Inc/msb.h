@@ -24,9 +24,9 @@ int8_t central_temp_measure(uint16_t *temp, uint16_t *humidity);
 #endif
 
 #ifdef SENSOR_IMU
-int8_t accel_read(uint16_t accel[3]);
+int8_t accel_read(LSM6DSO_Axes_t* accel);
 
-int8_t gyro_read(uint16_t gyro[3]);
+int8_t gyro_read(LSM6DSO_Axes_t* gyro);
 #endif
 
 #ifdef SENSOR_TOF

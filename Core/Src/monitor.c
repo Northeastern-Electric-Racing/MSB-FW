@@ -88,7 +88,7 @@ void vTempMonitor(void *pv_params)
 osThreadId_t imu_monitor_handle;
 const osThreadAttr_t imu_monitor_attributes = {
 	.name = "IMUMonitor",
-	.stack_size = 64 * 8,
+	.stack_size = 128 * 8,
 	.priority = (osPriority_t)osPriorityHigh,
 };
 
@@ -105,38 +105,38 @@ void vIMUMonitor(void *pv_params)
 				   .data = { 0 } };
 
 	struct __attribute__((__packed__)) {
-		uint16_t accel_x;
-		uint16_t accel_y;
-		uint16_t accel_z;
+		int16_t accel_x;
+		int16_t accel_y;
+		int16_t accel_z;
 	} accel_data;
 
 	struct __attribute__((__packed__)) {
-		uint16_t gyro_x;
-		uint16_t gyro_y;
-		uint16_t gyro_z;
+		int16_t gyro_x;
+		int16_t gyro_y;
+		int16_t gyro_z;
 	} gyro_data;
 
-	uint16_t accel_data_temp[3] = { 0 };
-	uint16_t gyro_data_temp[3] = { 0 };
+	LSM6DSO_Axes_t accel_data_temp = { 0 };
+	LSM6DSO_Axes_t gyro_data_temp = (LSM6DSO_Axes_t) { 0 };
 
 	for (;;) {
 		/* Take measurement */
 
-		if (accel_read(accel_data_temp)) {
+		if (accel_read(&accel_data_temp)) {
 			printf("Failed to get IMU acceleration\r\n");
 		}
 
-		if (gyro_read(gyro_data_temp)) {
+		if (gyro_read(&gyro_data_temp)) {
 			printf("Failed to get IMU gyroscope\r\n");
 		}
 
 		/* Run values through LPF of sample size  */
-		accel_data.accel_x = (accel_data.accel_x + accel_data_temp[0]);
-		accel_data.accel_y = (accel_data.accel_y + accel_data_temp[1]);
-		accel_data.accel_z = (accel_data.accel_z + accel_data_temp[2]);
-		gyro_data.gyro_x = (gyro_data.gyro_x + gyro_data_temp[0]);
-		gyro_data.gyro_y = (gyro_data.gyro_y + gyro_data_temp[1]);
-		gyro_data.gyro_z = (gyro_data.gyro_z + gyro_data_temp[2]);
+		accel_data.accel_x = accel_data_temp.x;
+		accel_data.accel_y = accel_data_temp.y;
+		accel_data.accel_z = accel_data_temp.z;
+		gyro_data.gyro_x = gyro_data_temp.x;
+		gyro_data.gyro_y = gyro_data_temp.y;
+		gyro_data.gyro_z = gyro_data_temp.z;
 
 #ifdef LOG_VERBOSE
 		printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,

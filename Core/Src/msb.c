@@ -1,6 +1,7 @@
 #include "msb.h"
 #include "main.h"
 #include "lsm6dso.h"
+#include "lsm6dso_reg.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,27 +16,25 @@ extern device_loc_t device_loc;
 osMutexId_t i2c_mutex;
 
 // reads imu reg
-static inline int imu_read_reg(uint8_t *data, uint8_t reg, uint8_t length)
+
+int32_t lsm6dso_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data, uint16_t len)
 {
-	return HAL_I2C_Mem_Read(&hi2c3, LSM6DSO_I2C_ADDRESS, reg,
-				I2C_MEMADD_SIZE_8BIT, data, length,
+	return HAL_I2C_Mem_Read(&hi2c3, LSM6DSO_I2C_ADD_L, reg,
+				I2C_MEMADD_SIZE_8BIT, data, len,
 				HAL_MAX_DELAY);
 }
-
-// read imu write
-static inline int imu_write_reg(uint8_t *data, uint8_t reg, uint8_t length)
+int32_t lsm6dso_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data, uint16_t len)
 {
-	return HAL_I2C_Mem_Write(&hi2c3, LSM6DSO_I2C_ADDRESS, reg,
-				 I2C_MEMADD_SIZE_8BIT, data, length,
-				 HAL_MAX_DELAY);
+	return HAL_I2C_Mem_Write(&hi2c3, LSM6DSO_I2C_ADD_L, reg,
+	I2C_MEMADD_SIZE_8BIT, data, len,
+	HAL_MAX_DELAY);
 }
-
 #ifdef SENSOR_TEMP
 sht30_t temp_sensor;
 #endif
 
 #ifdef SENSOR_IMU
-lsm6dso_t imu;
+LSM6DSO_Object_t imu;
 #endif
 
 #ifdef SENSOR_TOF
@@ -58,8 +57,7 @@ int8_t msb_init()
 
 #ifdef SENSOR_IMU
 	/* Initialize the IMU */
-	assert(!lsm6dso_init(&imu, imu_read_reg,
-			     imu_write_reg)); /* This is always connected */
+	assert(!LSM6DSO_Init(&imu)); /* This is always connected */
 #endif
 
 #ifdef SENSOR_TOF
@@ -85,6 +83,9 @@ int8_t msb_init()
 	i2c_mutex = osMutexNew(&msb_i2c_mutex_attr);
 	assert(i2c_mutex);
 
+	LSM6DSO_ACC_Enable(&imu);
+	LSM6DSO_GYRO_Enable(&imu);
+	LSM6DSO_GYRO_Set_Power_Mode(&imu, LSM6DSO_GY_HIGH_PERFORMANCE);
 	return 0;
 }
 
@@ -138,33 +139,31 @@ void strain2_read(uint32_t strain2)
 #endif
 
 #ifdef SENSOR_IMU
-int8_t accel_read(uint16_t accel[3])
+int8_t accel_read(LSM6DSO_Axes_t* accel)
 {
 	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
 	if (mut_stat)
 		return mut_stat;
-
-	HAL_StatusTypeDef hal_stat = lsm6dso_read_accel(&imu);
+	HAL_StatusTypeDef hal_stat = LSM6DSO_ACC_GetAxes(&imu, accel);
 	if (hal_stat)
 		return hal_stat;
 
-	memcpy(accel, imu.accel_data, 3);
+	//memcpy(accel, imu.accel, 3);
 
 	osMutexRelease(i2c_mutex);
 	return 0;
 }
 
-int8_t gyro_read(uint16_t gyro[3])
+int8_t gyro_read(LSM6DSO_Axes_t* gyro)
 {
 	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
 	if (mut_stat)
 		return mut_stat;
-
-	HAL_StatusTypeDef hal_stat = lsm6dso_read_gyro(&imu);
+	HAL_StatusTypeDef hal_stat = LSM6DSO_GYRO_GetAxes(&imu, gyro);
 	if (hal_stat)
 		return hal_stat;
 
-	memcpy(gyro, imu.gyro_data, 3);
+	//memcpy(gyro, imu.gyro, 3);
 
 	osMutexRelease(i2c_mutex);
 	return 0;
