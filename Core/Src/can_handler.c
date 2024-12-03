@@ -45,7 +45,7 @@ void can1_init()
 osThreadId_t can_dispatch_handle;
 const osThreadAttr_t can_dispatch_attributes = {
 	.name = "CanDispatch",
-	.stack_size = 128 * 8,
+	.stack_size = CAN_DISPATCH_STACK_SIZE,
 	.priority = (osPriority_t)osPriorityRealtime5,
 };
 

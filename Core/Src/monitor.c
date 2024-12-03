@@ -34,7 +34,7 @@ uint16_t convert_can(uint16_t original_value, device_loc_t mode)
 osThreadId_t temp_monitor_handle;
 const osThreadAttr_t temp_monitor_attributes = {
 	.name = "TempMonitor",
-	.stack_size = 64 * 16,
+	.stack_size = TEMP_MONITOR_STACK_SIZE,
 	.priority = (osPriority_t)osPriorityHigh1,
 };
 
@@ -88,7 +88,7 @@ void vTempMonitor(void *pv_params)
 osThreadId_t imu_monitor_handle;
 const osThreadAttr_t imu_monitor_attributes = {
 	.name = "IMUMonitor",
-	.stack_size = 64 * 8,
+	.stack_size = IMU_MONITOR_STACK_SIZE,
 	.priority = (osPriority_t)osPriorityHigh,
 };
 
@@ -174,7 +174,7 @@ void vIMUMonitor(void *pv_params)
 osThreadId_t tof_monitor_handle;
 const osThreadAttr_t tof_monitor_attributes = {
 	.name = "TOFMonitor",
-	.stack_size = 128 * 8,
+	.stack_size = TOF_MONITOR_STACK_SIZE,
 	.priority = (osPriority_t)osPriorityHigh,
 };
 
@@ -213,7 +213,7 @@ void vTOFMonitor(void *pv_params)
 osThreadId_t shockpot_monitor_handle;
 const osThreadAttr_t shockpot_monitor_attributes = {
 	.name = "ShockpotMonitor",
-	.stack_size = 64 * 8,
+	.stack_size = SHOCKPOT_MONITOR_STACK_SIZE,
 	.priority = (osPriority_t)osPriorityHigh1,
 };
 
@@ -251,7 +251,7 @@ void vShockpotMonitor(void *pv_params)
 osThreadId_t strain_monitor_handle;
 const osThreadAttr_t strain_monitor_attributes = {
 	.name = "StrainMonitor",
-	.stack_size = 64 * 8,
+	.stack_size = STRAIN_MONITOR_STACK_SIZE,
 	.priority = (osPriority_t)osPriorityHigh1,
 };
 

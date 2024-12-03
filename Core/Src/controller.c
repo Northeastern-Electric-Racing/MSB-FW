@@ -7,7 +7,7 @@ extern device_loc_t device_loc;
 osThreadId_t led_controller_handle;
 const osThreadAttr_t led_controller_attributes = {
 	.name = "LedController",
-	.stack_size = 32 * 8,
+	.stack_size = LED_CONTROLLER_STACK_SIZE,
 	.priority = (osPriority_t)osPriorityBelowNormal1,
 };
 
