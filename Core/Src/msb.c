@@ -83,9 +83,14 @@ int8_t msb_init()
 	i2c_mutex = osMutexNew(&msb_i2c_mutex_attr);
 	assert(i2c_mutex);
 
+	/* Setup IMU Accelerometer */
 	LSM6DSO_ACC_Enable(&imu);
+
+	/* Setup IMU Gyroscope */
 	LSM6DSO_GYRO_Enable(&imu);
-	LSM6DSO_GYRO_Set_Power_Mode(&imu, LSM6DSO_GY_HIGH_PERFORMANCE);
+
+	LSM6DSO_FIFO_Set_Mode(&imu, 0);
+	LSM6DSO_ACC_Disable_Inactivity_Detection(&imu);
 	return 0;
 }
 

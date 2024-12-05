@@ -116,33 +116,44 @@ void vIMUMonitor(void *pv_params)
 		int16_t gyro_z;
 	} gyro_data;
 
-	LSM6DSO_Axes_t accel_data_temp = { 0 };
-	LSM6DSO_Axes_t gyro_data_temp = (LSM6DSO_Axes_t) { 0 };
+	struct __attribute__((__packed__)) {
+		float_t temp;
+	} temperature_data;  
+
+	stmdev_ctx_t ctx;
+	stmdev_ctx_t aux_ctx;
+	//int16_t temperature_data_temp;
+
+	lsm6dso_md_t imu_md_temp;
+	lsm6dso_data_t imu_data_temp;
+
+	/* Add parameters for formatting data */
+	imu_md_temp.ui.gy.fs = LSM6DSO_500dps;
+	imu_md_temp.ui.gy.odr = LSM6DSO_GY_UI_52Hz_LP;
+	imu_md_temp.ui.xl.fs = LSM6DSO_XL_UI_2g;
+	imu_md_temp.ui.xl.odr = LSM6DSO_XL_UI_52Hz_LP;
 
 	for (;;) {
 		/* Take measurement */
-
-		if (accel_read(&accel_data_temp)) {
-			printf("Failed to get IMU acceleration\r\n");
-		}
-
-		if (gyro_read(&gyro_data_temp)) {
-			printf("Failed to get IMU gyroscope\r\n");
+		if (lsm6dso_data_get(&ctx, &aux_ctx, &imu_md_temp, &imu_data_temp)) {
+			printf("Failed to get IMU data \r\n");
 		}
 
 		/* Run values through LPF of sample size  */
-		accel_data.accel_x = accel_data_temp.x;
-		accel_data.accel_y = accel_data_temp.y;
-		accel_data.accel_z = accel_data_temp.z;
-		gyro_data.gyro_x = gyro_data_temp.x;
-		gyro_data.gyro_y = gyro_data_temp.y;
-		gyro_data.gyro_z = gyro_data_temp.z;
+		accel_data.accel_x = imu_data_temp.ui.xl.mg[0];
+		accel_data.accel_y = imu_data_temp.ui.xl.mg[1];
+		accel_data.accel_z = imu_data_temp.ui.xl.mg[2];
+		gyro_data.gyro_x = imu_data_temp.ui.gy.mdps[0];
+		gyro_data.gyro_y = imu_data_temp.ui.gy.mdps[1];
+		gyro_data.gyro_z = imu_data_temp.ui.gy.mdps[2];
+		temperature_data.temp = imu_data_temp.ui.heat.deg_c;
 
 #ifdef LOG_VERBOSE
 		printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,
 		       accel_data.accel_y, accel_data.accel_z);
 		printf("IMU Gyro x: %d y: %d z: %d \r\n", gyro_data.gyro_x,
 		       gyro_data.gyro_y, gyro_data.gyro_z);
+		printf("IMU Temp: %3.2f °C \r\n", temperature_data.temp);
 #endif
 
 		/* convert to big endian */
@@ -152,6 +163,7 @@ void vIMUMonitor(void *pv_params)
 		endian_swap(&gyro_data.gyro_x, sizeof(gyro_data.gyro_x));
 		endian_swap(&gyro_data.gyro_y, sizeof(gyro_data.gyro_y));
 		endian_swap(&gyro_data.gyro_z, sizeof(gyro_data.gyro_z));
+		endian_swap(&temperature_data.temp, sizeof(temperature_data.temp));
 
 		/* Send CAN message */
 		memcpy(imu_accel_msg.data, &accel_data, imu_accel_msg.len);
