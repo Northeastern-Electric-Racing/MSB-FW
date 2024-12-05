@@ -144,7 +144,7 @@ void strain2_read(uint32_t strain2)
 #endif
 
 #ifdef SENSOR_IMU
-int8_t accel_read(LSM6DSO_Axes_t* accel)
+int8_t accel_read(LSM6DSO_Axes_t *accel)
 {
 	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
 	if (mut_stat)
@@ -159,7 +159,7 @@ int8_t accel_read(LSM6DSO_Axes_t* accel)
 	return 0;
 }
 
-int8_t gyro_read(LSM6DSO_Axes_t* gyro)
+int8_t gyro_read(LSM6DSO_Axes_t *gyro)
 {
 	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
 	if (mut_stat)
