@@ -163,7 +163,6 @@ void vIMUMonitor(void *pv_params)
 		endian_swap(&gyro_data.gyro_x, sizeof(gyro_data.gyro_x));
 		endian_swap(&gyro_data.gyro_y, sizeof(gyro_data.gyro_y));
 		endian_swap(&gyro_data.gyro_z, sizeof(gyro_data.gyro_z));
-		endian_swap(&temperature_data.temp, sizeof(temperature_data.temp));
 
 		/* Send CAN message */
 		memcpy(imu_accel_msg.data, &accel_data, imu_accel_msg.len);
