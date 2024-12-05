@@ -47,15 +47,13 @@ uint32_t adc1_buf[3];
 
 int8_t msb_init()
 {
-#ifdef SENSOR_TEMP
+#ifdef SENSOR_TEMP && SENSOR_IMU
 	/* Initialize the Onboard Temperature Sensor */
 	temp_sensor = (sht30_t){
 		.i2c_handle = &hi2c3,
 	};
 	assert(!sht30_init(&temp_sensor)); /* This is always connected */
-#endif
 
-#ifdef SENSOR_IMU
 	/* Initialize the IMU */
 	assert(!LSM6DSO_Init(&imu)); /* This is always connected */
 
@@ -184,7 +182,18 @@ int8_t vcc5_en_write(bool status)
 	return 0;
 }
 
+#ifdef SENSOR_IMU
 int32_t imu_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx, lsm6dso_md_t *imu_md_temp, lsm6dso_data_t *imu_data_temp)
 {
-	lsm6dso_data_get(&ctx, &aux_ctx, &imu_md_temp, &imu_data_temp);
+	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
+	if (mut_stat)
+		return mut_stat;
+	HAL_StatusTypeDef hal_stat = lsm6dso_data_get(&ctx, &aux_ctx, &imu_md_temp, &imu_data_temp);;
+	if (hal_stat)
+		return hal_stat;
+
+	//memcpy(gyro, imu.gyro, 3);
+
+	osMutexRelease(i2c_mutex);
 }
+#endif
