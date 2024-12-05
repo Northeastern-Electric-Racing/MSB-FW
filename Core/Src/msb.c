@@ -47,13 +47,15 @@ uint32_t adc1_buf[3];
 
 int8_t msb_init()
 {
-#ifdef SENSOR_TEMP && SENSOR_IMU
+#ifdef SENSOR_TEMP
 	/* Initialize the Onboard Temperature Sensor */
 	temp_sensor = (sht30_t){
 		.i2c_handle = &hi2c3,
 	};
 	assert(!sht30_init(&temp_sensor)); /* This is always connected */
+#endif
 
+#ifdef SENSOR_IMU
 	/* Initialize the IMU */
 	assert(!LSM6DSO_Init(&imu)); /* This is always connected */
 
