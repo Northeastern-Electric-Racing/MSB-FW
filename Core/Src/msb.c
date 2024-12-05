@@ -58,6 +58,15 @@ int8_t msb_init()
 #ifdef SENSOR_IMU
 	/* Initialize the IMU */
 	assert(!LSM6DSO_Init(&imu)); /* This is always connected */
+
+	/* Setup IMU Accelerometer */
+	LSM6DSO_ACC_Enable(&imu);
+
+	/* Setup IMU Gyroscope */
+	LSM6DSO_GYRO_Enable(&imu);
+
+	LSM6DSO_FIFO_Set_Mode(&imu, 0);
+	LSM6DSO_ACC_Disable_Inactivity_Detection(&imu);
 #endif
 
 #ifdef SENSOR_TOF
@@ -83,14 +92,6 @@ int8_t msb_init()
 	i2c_mutex = osMutexNew(&msb_i2c_mutex_attr);
 	assert(i2c_mutex);
 
-	/* Setup IMU Accelerometer */
-	LSM6DSO_ACC_Enable(&imu);
-
-	/* Setup IMU Gyroscope */
-	LSM6DSO_GYRO_Enable(&imu);
-
-	LSM6DSO_FIFO_Set_Mode(&imu, 0);
-	LSM6DSO_ACC_Disable_Inactivity_Detection(&imu);
 	return 0;
 }
 
@@ -143,38 +144,6 @@ void strain2_read(uint32_t strain2)
 }
 #endif
 
-#ifdef SENSOR_IMU
-int8_t accel_read(LSM6DSO_Axes_t *accel)
-{
-	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
-	if (mut_stat)
-		return mut_stat;
-	HAL_StatusTypeDef hal_stat = LSM6DSO_ACC_GetAxes(&imu, accel);
-	if (hal_stat)
-		return hal_stat;
-
-	//memcpy(accel, imu.accel, 3);
-
-	osMutexRelease(i2c_mutex);
-	return 0;
-}
-
-int8_t gyro_read(LSM6DSO_Axes_t *gyro)
-{
-	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
-	if (mut_stat)
-		return mut_stat;
-	HAL_StatusTypeDef hal_stat = LSM6DSO_GYRO_GetAxes(&imu, gyro);
-	if (hal_stat)
-		return hal_stat;
-
-	//memcpy(gyro, imu.gyro, 3);
-
-	osMutexRelease(i2c_mutex);
-	return 0;
-}
-#endif
-
 #ifdef SENSOR_TOF
 VL6180x_RangeData_t *range;
 int8_t distance_read(int32_t *range_mm)
@@ -213,4 +182,9 @@ int8_t vcc5_en_write(bool status)
 {
 	HAL_GPIO_WritePin(VCC5_En_GPIO_Port, VCC5_En_Pin, status);
 	return 0;
+}
+
+int32_t imu_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx, lsm6dso_md_t *imu_md_temp, lsm6dso_data_t *imu_data_temp)
+{
+	lsm6dso_data_get(&ctx, &aux_ctx, &imu_md_temp, &imu_data_temp);
 }

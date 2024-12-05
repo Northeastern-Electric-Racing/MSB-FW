@@ -23,12 +23,6 @@ int8_t msb_init();
 int8_t central_temp_measure(uint16_t *temp, uint16_t *humidity);
 #endif
 
-#ifdef SENSOR_IMU
-int8_t accel_read(LSM6DSO_Axes_t *accel);
-
-int8_t gyro_read(LSM6DSO_Axes_t *gyro);
-#endif
-
 #ifdef SENSOR_TOF
 int8_t distance_read(int32_t *range_mm);
 #endif
@@ -38,6 +32,8 @@ int8_t debug1_write(bool status);
 int8_t debug2_write(bool status);
 
 int8_t vcc5_en_write(bool status);
+
+int32_t imu_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx, lsm6dso_md_t *imu_md_temp, lsm6dso_data_t *imu_data_temp);
 
 #ifdef SENSOR_SHOCKPOT
 void shockpot_read(uint32_t shockpot_sense);

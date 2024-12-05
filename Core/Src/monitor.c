@@ -135,7 +135,7 @@ void vIMUMonitor(void *pv_params)
 
 	for (;;) {
 		/* Take measurement */
-		if (lsm6dso_data_get(&ctx, &aux_ctx, &imu_md_temp, &imu_data_temp)) {
+		if (imu_data_get(&ctx, &aux_ctx, &imu_md_temp, &imu_data_temp)) {
 			printf("Failed to get IMU data \r\n");
 		}
 
