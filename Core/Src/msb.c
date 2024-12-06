@@ -190,7 +190,7 @@ int32_t imu_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx, lsm6dso_md_t *imu
 	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
 	if (mut_stat)
 		return mut_stat;
-	HAL_StatusTypeDef hal_stat = lsm6dso_data_get(&ctx, &aux_ctx, &imu_md_temp, &imu_data_temp);;
+	HAL_StatusTypeDef hal_stat = lsm6dso_data_get(&ctx, &aux_ctx, &imu_md_temp, &imu_data_temp);
 	if (hal_stat)
 		return hal_stat;
 
