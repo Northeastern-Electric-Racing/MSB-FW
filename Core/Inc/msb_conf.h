@@ -47,7 +47,7 @@
 #define CAN_DISPATCH_STACK_SIZE 128 * 8 //can_dispatch_handle
 #define LED_CONTROLLER_STACK_SIZE 32 * 8 //led_controller_handle
 #define DEFAULT_TASK_STACK_SIZE 128 * 4 //defaultTaskHandle
-#define TEMP_MONITOR_STACK_SIZE 64 * 8 //temp_monitor_handle
+#define TEMP_MONITOR_STACK_SIZE 64 * 16 //temp_monitor_handle
 #define IMU_MONITOR_STACK_SIZE 128 * 8 //imu_monitor_handle
 #define TOF_MONITOR_STACK_SIZE 128 * 8 //tof_monitor_handle
 #define SHOCKPOT_MONITOR_STACK_SIZE 64 * 8 //shockpot_monitor_handle
