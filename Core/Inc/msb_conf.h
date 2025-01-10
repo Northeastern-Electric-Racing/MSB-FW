@@ -35,7 +35,7 @@
 #define SENSOR_STRAIN
 //#define SENSOR_TOF
 
-// #define SENSOR_IMU       //NOTE
+#define SENSOR_IMU
 // on knuckle or /wheel
 //#define SENSOR_WHEEL_TEMP
 
