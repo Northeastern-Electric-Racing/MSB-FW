@@ -94,7 +94,7 @@ const osThreadAttr_t imu_monitor_attributes = {
 
 void vIMUMonitor(void *pv_params)
 {
-	//const uint8_t num_samples = 10;
+	// const uint8_t num_samples = 10;
 	can_msg_t imu_accel_msg = { .id = convert_can(CANID_IMU_ACCEL,
 						      device_loc),
 				    .len = 6,
@@ -105,44 +105,56 @@ void vIMUMonitor(void *pv_params)
 				   .data = { 0 } };
 
 	struct __attribute__((__packed__)) {
-		uint16_t accel_x;
-		uint16_t accel_y;
-		uint16_t accel_z;
+		int16_t accel_x;
+		int16_t accel_y;
+		int16_t accel_z;
 	} accel_data;
 
 	struct __attribute__((__packed__)) {
-		uint16_t gyro_x;
-		uint16_t gyro_y;
-		uint16_t gyro_z;
+		int16_t gyro_x;
+		int16_t gyro_y;
+		int16_t gyro_z;
 	} gyro_data;
 
-	uint16_t accel_data_temp[3] = { 0 };
-	uint16_t gyro_data_temp[3] = { 0 };
+	struct __attribute__((__packed__)) {
+		float_t temp;
+	} temperature_data;
+
+	stmdev_ctx_t ctx;
+	stmdev_ctx_t aux_ctx;
+	// int16_t temperature_data_temp;
+
+	lsm6dso_md_t imu_md_temp;
+	lsm6dso_data_t imu_data_temp;
+
+	/* Add parameters for formatting data */
+	imu_md_temp.ui.gy.fs = LSM6DSO_500dps;
+	imu_md_temp.ui.gy.odr = LSM6DSO_GY_UI_52Hz_LP;
+	imu_md_temp.ui.xl.fs = LSM6DSO_XL_UI_2g;
+	imu_md_temp.ui.xl.odr = LSM6DSO_XL_UI_52Hz_LP;
 
 	for (;;) {
 		/* Take measurement */
-
-		if (accel_read(accel_data_temp)) {
-			printf("Failed to get IMU acceleration\r\n");
-		}
-
-		if (gyro_read(gyro_data_temp)) {
-			printf("Failed to get IMU gyroscope\r\n");
+		if (imu_data_get(&ctx, &aux_ctx, &imu_md_temp,
+				 &imu_data_temp)) {
+			printf("Failed to get IMU data \r\n");
 		}
 
 		/* Run values through LPF of sample size  */
-		accel_data.accel_x = (accel_data.accel_x + accel_data_temp[0]);
-		accel_data.accel_y = (accel_data.accel_y + accel_data_temp[1]);
-		accel_data.accel_z = (accel_data.accel_z + accel_data_temp[2]);
-		gyro_data.gyro_x = (gyro_data.gyro_x + gyro_data_temp[0]);
-		gyro_data.gyro_y = (gyro_data.gyro_y + gyro_data_temp[1]);
-		gyro_data.gyro_z = (gyro_data.gyro_z + gyro_data_temp[2]);
+		accel_data.accel_x = imu_data_temp.ui.xl.mg[0];
+		accel_data.accel_y = imu_data_temp.ui.xl.mg[1];
+		accel_data.accel_z = imu_data_temp.ui.xl.mg[2];
+		gyro_data.gyro_x = imu_data_temp.ui.gy.mdps[0];
+		gyro_data.gyro_y = imu_data_temp.ui.gy.mdps[1];
+		gyro_data.gyro_z = imu_data_temp.ui.gy.mdps[2];
+		temperature_data.temp = imu_data_temp.ui.heat.deg_c;
 
 #ifdef LOG_VERBOSE
 		printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,
 		       accel_data.accel_y, accel_data.accel_z);
 		printf("IMU Gyro x: %d y: %d z: %d \r\n", gyro_data.gyro_x,
 		       gyro_data.gyro_y, gyro_data.gyro_z);
+		printf("IMU Temp: %3.2f °C \r\n", temperature_data.temp);
 #endif
 
 		/* convert to big endian */
