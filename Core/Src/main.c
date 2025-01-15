@@ -110,7 +110,6 @@ int _write(int file, char* ptr, int len) {
   }
   return len;
 }
-
 /* USER CODE END 0 */
 
 /**
