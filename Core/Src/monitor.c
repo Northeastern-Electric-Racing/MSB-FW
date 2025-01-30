@@ -190,7 +190,7 @@ void vIMUMonitor(void *pv_params)
 
 		#endif
 
-#ifdef LOG_VERBOSE
+#if defined LOG_VERBOSE && MOTION_FX
 		printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,
 		       accel_data.accel_y, accel_data.accel_z);
 		printf("IMU Gyro x: %d y: %d z: %d \r\n", gyro_data.gyro_x,
@@ -207,9 +207,12 @@ void vIMUMonitor(void *pv_params)
 		endian_swap(&gyro_data.gyro_x, sizeof(gyro_data.gyro_x));
 		endian_swap(&gyro_data.gyro_y, sizeof(gyro_data.gyro_y));
 		endian_swap(&gyro_data.gyro_z, sizeof(gyro_data.gyro_z));
+
+		#ifdef MOTION_FX
 		endian_swap(&orientation_data.roll, sizeof(orientation_data.roll));
 		endian_swap(&orientation_data.pitch, sizeof(orientation_data.pitch));
 		endian_swap(&orientation_data.yaw, sizeof(orientation_data.yaw));
+		#endif
 
 		/* Send CAN message */
 		memcpy(imu_accel_msg.data, &accel_data, imu_accel_msg.len);
@@ -222,10 +225,12 @@ void vIMUMonitor(void *pv_params)
 			printf("Failed to send CAN message\r\n");
 		}
 
+		#ifdef MOTION_FX
 		memcpy(imu_orientation_msg.data, &orientation_data, imu_orientation_msg.len);
 		if (queue_can_msg(imu_orientation_msg)) {
 			printf("Failed to send CAN message\r\n");
 		}
+		#endif
 
 		/* Yield to other tasks */
 		osDelay(DELAY_IMU_REFRESH);
