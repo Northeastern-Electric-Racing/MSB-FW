@@ -1,6 +1,7 @@
 #include "msb.h"
 #include "lsm6dso.h"
 #include "lsm6dso_reg.h"
+#include "motion_fx.h"
 #include "main.h"
 #include <assert.h>
 #include <stdio.h>
@@ -68,6 +69,11 @@ int8_t msb_init()
 
 	LSM6DSO_FIFO_Set_Mode(&imu, 0);
 	LSM6DSO_ACC_Disable_Inactivity_Detection(&imu);
+#endif
+
+#ifdef MOTION_FX
+	/* Initialize Motion FX*/
+	motion_fx_init();
 #endif
 
 #ifdef SENSOR_TOF
@@ -199,4 +205,42 @@ int32_t imu_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
 		return hal_stat;
 	return 0;
 }
+#endif
+
+#ifdef MOTION_FX
+
+MFXState_t mFXState;
+static MFX_output_t mFXOutput;
+
+void motion_fx_init(void)
+{
+	mFXState = malloc(MotionFX_GetStateSize());
+	if (!mFXState)
+	{
+		printf("Failed to allocate memory for MotionFX!!\r\n");
+		return;
+	}
+
+	MotionFX_initialize(mFXState);
+
+	MotionFX_enable_6X(mFXState, MFX_ENGINE_ENABLE);
+
+	float gyroBias[3] = { 0.0f, 0.0f, 0.0f };
+
+	MotionFX_setGbias(mFXState, gyroBias);
+
+	printf("MotionFX Initiailized.\r\n");
+}
+
+void process_motion_fx(MFX_input_t *mfxIn, float *roll, float *pitch, float *yaw)
+{
+	float delta_time = 0.5f;
+
+	MotionFX_update(mFXState, &mFXOutput, mfxIn, &delta_time, NULL);
+
+	*yaw = mFXOutput.rotation[0];
+	*pitch = mFXOutput.rotation[1];
+	*roll = mFXOutput.rotation[2];
+}
+
 #endif

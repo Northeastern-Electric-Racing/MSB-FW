@@ -4,6 +4,7 @@
 
 #include "cmsis_os.h"
 #include "lsm6dso.h"
+#include "motion_fx.h"
 #include "sht30.h"
 #include "stm32f405xx.h"
 #include "vl6180x_api.h"
@@ -43,6 +44,12 @@ void shockpot_read(uint32_t shockpot_sense);
 #ifdef SENSOR_STRAIN
 void strain1_read(uint32_t strain1);
 void strain2_read(uint32_t strain2);
+#endif
+
+#ifdef MOTION_FX
+extern MFXState_t mFXState;
+void motion_fx_init(void);
+void process_motion_fx(MFX_input_t *mfxIn, float *roll, float *pitch, float *yaw);
 #endif
 
 #endif

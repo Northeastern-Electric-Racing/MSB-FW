@@ -23,6 +23,7 @@
 #define CANID_SHOCK_SENSE  0x606
 #define CANID_TOF	   0x607
 #define CANID_WHEEL_TEMP   0x608
+#define CANID_IMU_ORIENTATION 0x609
 
 // Sensors to use, comment out to disable
 
@@ -38,6 +39,9 @@
 #define SENSOR_IMU
 // on knuckle or /wheel
 //#define SENSOR_WHEEL_TEMP
+
+// IMU Sensor Fusion
+#define MOTION_FX
 
 // VERBOSE LOGGING
 #define LOG_VERBOSE
