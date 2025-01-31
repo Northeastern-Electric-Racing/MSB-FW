@@ -54,6 +54,8 @@ void strain2_read(uint32_t strain2);
 
 #define DECIMATION 1U
 
+#define STATE_SIZE (size_t)(2432)
+
 void motion_fx_init(void);
 void process_motion_fx(MFX_input_t *data_in, MFX_output_t *data_out, float delta_time);
 
