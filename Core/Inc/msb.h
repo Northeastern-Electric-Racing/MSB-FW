@@ -47,9 +47,16 @@ void strain2_read(uint32_t strain2);
 #endif
 
 #ifdef MOTION_FX
-extern MFXState_t mFXState;
+
+#define GBIAS_ACC_TH_SC (2.0f*0.000765f)
+#define GBIAS_GYRO_TH_SC (2.0f*0.002f)
+#define GBIAS_MAG_TH_SC 0.0f
+
+#define DECIMATION 1U
+
 void motion_fx_init(void);
-void process_motion_fx(MFX_input_t *mfxIn, float *roll, float *pitch, float *yaw);
+void process_motion_fx(MFX_input_t *data_in, MFX_output_t *data_out, float delta_time);
+
 #endif
 
 #endif
