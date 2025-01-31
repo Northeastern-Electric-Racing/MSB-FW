@@ -186,7 +186,7 @@ void vIMUMonitor(void *pv_params)
 		mFXInput.mag[1] = 0.0f;
 		mFXInput.mag[2] = 0.0f;
 
-		process_motion_fx(&mFXInput, &mFXOutput, 0.5f);
+		process_motion_fx(&mFXInput, &mFXOutput, 0.05f);
 
 		orientation_data.yaw = (int16_t)mFXOutput.rotation[0];
 		orientation_data.pitch = (int16_t)mFXOutput.rotation[1];
