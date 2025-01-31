@@ -134,7 +134,7 @@ void vIMUMonitor(void *pv_params)
 									  .data = { 0 } };
 
 	MFX_input_t mFXInput;
-	float roll, pitch, yaw;
+	MFX_output_t mFXOutput;
 
 	struct __attribute__((__packed__)) {
 		int16_t roll;
@@ -168,29 +168,29 @@ void vIMUMonitor(void *pv_params)
 		#ifdef MOTION_FX
 
 			// Acc (Convert mg to g)
-			mFXInput.acc[0] = imu_data_temp.ui.xl.mg[0] / 1000.0f;
-			mFXInput.acc[1] = imu_data_temp.ui.xl.mg[1] / 1000.0f;
-			mFXInput.acc[2] = imu_data_temp.ui.xl.mg[2] / 1000.0f;
+			mFXInput.acc[0] = (float)(imu_data_temp.ui.xl.mg[0] / 1000.0f);
+			mFXInput.acc[1] = (float)(imu_data_temp.ui.xl.mg[1] / 1000.0f);
+			mFXInput.acc[2] = (float)(imu_data_temp.ui.xl.mg[2] / 1000.0f);
 
 			// Gyro (Convert mdps to dps)
-			mFXInput.gyro[0] = imu_data_temp.ui.gy.mdps[0] * 0.001f;
-			mFXInput.gyro[1] = imu_data_temp.ui.gy.mdps[1] * 0.001f;
-			mFXInput.gyro[2] = imu_data_temp.ui.gy.mdps[2] * 0.001f;
+			mFXInput.gyro[0] = (float)(imu_data_temp.ui.gy.mdps[0] * 0.001f);
+			mFXInput.gyro[1] = (float)(imu_data_temp.ui.gy.mdps[1] * 0.001f);
+			mFXInput.gyro[2] = (float)(imu_data_temp.ui.gy.mdps[2] * 0.001f);
 
 			// Magnetometer
 			mFXInput.mag[0] = 0.0f;
 			mFXInput.mag[1] = 0.0f;
 			mFXInput.mag[2] = 0.0f;
 
-			process_motion_fx(&mFXInput, &roll, &pitch, &yaw);
+			process_motion_fx(&mFXInput, &mFXOutput, 0.5f);
 
-			orientation_data.roll = (int16_t)roll;
-			orientation_data.pitch = (int16_t)pitch;
-			orientation_data.yaw = (int16_t)yaw;
+			orientation_data.yaw = (int16_t)mFXOutput.rotation[0];
+			orientation_data.pitch = (int16_t)mFXOutput.rotation[1];			
+			orientation_data.roll = (int16_t)mFXOutput.rotation[2];
 
 		#endif
 
-#if defined LOG_VERBOSE && MOTION_FX
+#ifdef LOG_VERBOSE & MOTION_FX
 		printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,
 		       accel_data.accel_y, accel_data.accel_z);
 		printf("IMU Gyro x: %d y: %d z: %d \r\n", gyro_data.gyro_x,

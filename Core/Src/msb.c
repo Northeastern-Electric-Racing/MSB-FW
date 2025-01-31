@@ -39,6 +39,12 @@ sht30_t temp_sensor;
 LSM6DSO_Object_t imu;
 #endif
 
+#ifdef MOTION_FX
+static MFX_knobs_t iKnobs;
+static MFX_knobs_t *ipKnobs = &iKnobs;
+static uint8_t *mFXState;
+#endif
+
 #ifdef SENSOR_TOF
 VL6180xDev_t tof;
 #endif
@@ -209,38 +215,56 @@ int32_t imu_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
 
 #ifdef MOTION_FX
 
-MFXState_t mFXState;
-static MFX_output_t mFXOutput;
-
 void motion_fx_init(void)
 {
-	mFXState = malloc(MotionFX_GetStateSize());
-	if (!mFXState)
-	{
-		printf("Failed to allocate memory for MotionFX!!\r\n");
+	size_t state_size = MotionFX_GetStateSize();
+
+	if (state_size == 0) {
+		printf("ERROR: MotionFX_GetStateSize returned 0!\n");
 		return;
 	}
 
-	MotionFX_initialize(mFXState);
+	mFXState = malloc(state_size);
+
+	if (mFXState == NULL) {
+    	printf("ERROR: Failed to allocate memory for mFXState!\n");
+    	return;
+	}
+
+	MotionFX_initialize((MFXState_t *)mFXState);
+
+	MotionFX_getKnobs(mFXState, ipKnobs);
+
+	ipKnobs->acc_orientation[0] = 's';
+	ipKnobs->acc_orientation[1] = 'e';
+	ipKnobs->acc_orientation[2] = 'u';
+
+	ipKnobs->gyro_orientation[0] = 's';
+	ipKnobs->gyro_orientation[1] = 'e';
+	ipKnobs->gyro_orientation[2] = 'u';
+
+	ipKnobs->mag_orientation[0] = 'n';
+	ipKnobs->mag_orientation[1] = 'e';
+	ipKnobs->mag_orientation[2] = 'u';
+
+	ipKnobs->gbias_acc_th_sc = GBIAS_ACC_TH_SC;
+	ipKnobs->gbias_gyro_th_sc = GBIAS_GYRO_TH_SC;
+	ipKnobs->gbias_mag_th_sc = GBIAS_MAG_TH_SC;
+
+	ipKnobs->output_type = MFX_ENGINE_OUTPUT_ENU;
+	ipKnobs->LMode = 1;
+	ipKnobs->modx = DECIMATION;
+
+	MotionFX_setKnobs(mFXState, ipKnobs);
 
 	MotionFX_enable_6X(mFXState, MFX_ENGINE_ENABLE);
-
-	float gyroBias[3] = { 0.0f, 0.0f, 0.0f };
-
-	MotionFX_setGbias(mFXState, gyroBias);
-
-	printf("MotionFX Initiailized.\r\n");
 }
 
-void process_motion_fx(MFX_input_t *mfxIn, float *roll, float *pitch, float *yaw)
+void process_motion_fx(MFX_input_t *data_in, MFX_output_t *data_out, float delta_time)
 {
-	float delta_time = 0.5f;
+	MotionFX_propagate(mFXState, data_out, data_in, &delta_time);
 
-	MotionFX_update(mFXState, &mFXOutput, mfxIn, &delta_time, NULL);
-
-	*yaw = mFXOutput.rotation[0];
-	*pitch = mFXOutput.rotation[1];
-	*roll = mFXOutput.rotation[2];
+	MotionFX_update(mFXState, data_out, data_in, &delta_time, NULL);
 }
 
 #endif
