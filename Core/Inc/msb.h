@@ -5,11 +5,11 @@
 #include "cmsis_os.h"
 #include "lsm6dso.h"
 #include "motion_fx.h"
+#include "msb_conf.h"
 #include "sht30.h"
 #include "stm32f405xx.h"
 #include "vl6180x_api.h"
 #include "vl6180x_platform.h"
-#include "msb_conf.h"
 
 typedef enum {
 	DEVICE_FRONT_LEFT,
@@ -48,16 +48,17 @@ void strain2_read(uint32_t strain2);
 
 #ifdef MOTION_FX
 
-#define GBIAS_ACC_TH_SC (2.0f*0.000765f)
-#define GBIAS_GYRO_TH_SC (2.0f*0.002f)
-#define GBIAS_MAG_TH_SC 0.0f
+#define GBIAS_ACC_TH_SC	 (2.0f * 0.000765f)
+#define GBIAS_GYRO_TH_SC (2.0f * 0.002f)
+#define GBIAS_MAG_TH_SC	 0.0f
 
 #define DECIMATION 1U
 
 #define STATE_SIZE (size_t)(2432)
 
 void motion_fx_init(void);
-void process_motion_fx(MFX_input_t *data_in, MFX_output_t *data_out, float delta_time);
+void process_motion_fx(MFX_input_t *data_in, MFX_output_t *data_out,
+		       float delta_time);
 
 #endif
 
