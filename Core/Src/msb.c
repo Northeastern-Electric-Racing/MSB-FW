@@ -2,6 +2,7 @@
 #include "lsm6dso.h"
 #include "lsm6dso_reg.h"
 #include "main.h"
+#include "sht30.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,23 +47,29 @@ VL6180xDev_t tof;
 uint32_t adc1_buf[3];
 #endif
 
+inline Write_ptr sht30_i2c_write(sht3x_command_t command) {
+	return sht30_write_reg(&temp_sensor, command);
+}
+
+inline Read_ptr sht30_i2c_read() {
+	return sht30_read_reg(&temp_sensor);
+}
+
 int8_t msb_init()
 {
 #ifdef SENSOR_TEMP
 	/* Initialize the Onboard Temperature Sensor */
-	temp_sensor = (sht30_t){
-		.i2c_handle = &hi2c3,
-	};
-	assert(!sht30_init(&temp_sensor)); /* This is always connected */
+	sht30_t temp_sensor;
+	assert(!sht30_init(&temp_sensor, sht30_i2c_read(), sht30_i2c_write(SHT3X_COMMAND_MEASURE_HIGHREP_10HZ))); /* This is always connected */
 #endif
 
 #ifdef SENSOR_IMU
-	/* Initialize the IMU */
+	/* Initialize the IMU */	
 	assert(!LSM6DSO_Init(&imu)); /* This is always connected */
 
 	/* Setup IMU Accelerometer */
 	LSM6DSO_ACC_Enable(&imu);
-
+	
 	/* Setup IMU Gyroscope */
 	LSM6DSO_GYRO_Enable(&imu);
 
@@ -70,7 +77,7 @@ int8_t msb_init()
 	LSM6DSO_ACC_Disable_Inactivity_Detection(&imu);
 #endif
 
-#ifdef SENSOR_TOF
+#ifdef SENSOR_TOFsht30_t
 	/* Initialize the ToF sensor */
 	struct MyDev_t tof_get = {
 		.i2c_bus_num = 0x29 << 1,
@@ -106,9 +113,9 @@ int8_t central_temp_measure(uint16_t *temp, uint16_t *humidity)
 	if (mut_stat)
 		return mut_stat;
 
-	HAL_StatusTypeDef hal_stat = sht30_get_temp_humid(&temp_sensor);
-	if (hal_stat)
-		return hal_stat;
+	int status = sht30_get_temp_humid(&temp_sensor);
+	if (status)
+		return status;
 
 	*temp = temp_sensor.temp;
 	*humidity = temp_sensor.humidity;
