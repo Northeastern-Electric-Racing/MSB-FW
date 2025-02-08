@@ -127,7 +127,6 @@ void vIMUMonitor(void *pv_params)
 	lsm6dso_md_t imu_md_temp;
 	lsm6dso_data_t imu_data_temp;
 
-#ifdef MOTION_FX
 	can_msg_t imu_orientation_msg = {
 		.id = convert_can(CANID_IMU_ORIENTATION, device_loc),
 		.len = 6,
@@ -142,7 +141,6 @@ void vIMUMonitor(void *pv_params)
 		int16_t pitch;
 		int16_t yaw;
 	} orientation_data;
-#endif
 
 	/* Add parameters for formatting data */
 	imu_md_temp.ui.gy.fs = LSM6DSO_500dps;
@@ -165,8 +163,6 @@ void vIMUMonitor(void *pv_params)
 		gyro_data.gyro_y = imu_data_temp.ui.gy.mdps[1];
 		gyro_data.gyro_z = imu_data_temp.ui.gy.mdps[2];
 		temperature_data.temp = imu_data_temp.ui.heat.deg_c;
-
-#ifdef MOTION_FX
 
 		// Acc (Convert mg to g)
 		mFXInput.acc[0] = (float)(imu_data_temp.ui.xl.mg[0] / 1000.0f);
@@ -192,8 +188,6 @@ void vIMUMonitor(void *pv_params)
 		orientation_data.pitch = (int16_t)mFXOutput.rotation[1];
 		orientation_data.roll = (int16_t)mFXOutput.rotation[2];
 
-#endif
-
 #ifdef LOG_VERBOSE
 		printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,
 		       accel_data.accel_y, accel_data.accel_z);
@@ -212,15 +206,12 @@ void vIMUMonitor(void *pv_params)
 		endian_swap(&gyro_data.gyro_x, sizeof(gyro_data.gyro_x));
 		endian_swap(&gyro_data.gyro_y, sizeof(gyro_data.gyro_y));
 		endian_swap(&gyro_data.gyro_z, sizeof(gyro_data.gyro_z));
-
-#ifdef MOTION_FX
 		endian_swap(&orientation_data.roll,
 			    sizeof(orientation_data.roll));
 		endian_swap(&orientation_data.pitch,
 			    sizeof(orientation_data.pitch));
 		endian_swap(&orientation_data.yaw,
 			    sizeof(orientation_data.yaw));
-#endif
 
 		/* Send CAN message */
 		memcpy(imu_accel_msg.data, &accel_data, imu_accel_msg.len);
@@ -233,13 +224,11 @@ void vIMUMonitor(void *pv_params)
 			printf("Failed to send CAN message\r\n");
 		}
 
-#ifdef MOTION_FX
 		memcpy(imu_orientation_msg.data, &orientation_data,
 		       imu_orientation_msg.len);
 		if (queue_can_msg(imu_orientation_msg)) {
 			printf("Failed to send CAN message\r\n");
 		}
-#endif
 
 		/* Yield to other tasks */
 		osDelay(DELAY_IMU_REFRESH);

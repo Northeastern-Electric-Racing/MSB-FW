@@ -41,9 +41,6 @@
 // on knuckle or /wheel
 // #define SENSOR_WHEEL_TEMP
 
-// IMU Sensor Fusion
-#define MOTION_FX
-
 // VERBOSE LOGGING
 #define LOG_VERBOSE
 

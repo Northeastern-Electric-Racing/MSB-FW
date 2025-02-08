@@ -46,7 +46,7 @@ void strain1_read(uint32_t strain1);
 void strain2_read(uint32_t strain2);
 #endif
 
-#ifdef MOTION_FX
+#ifdef SENSOR_IMU
 
 #define GBIAS_ACC_TH_SC	 (2.0f * 0.000765f)
 #define GBIAS_GYRO_TH_SC (2.0f * 0.002f)

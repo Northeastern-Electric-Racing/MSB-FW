@@ -37,9 +37,6 @@ sht30_t temp_sensor;
 
 #ifdef SENSOR_IMU
 LSM6DSO_Object_t imu;
-#endif
-
-#ifdef MOTION_FX
 static MFX_knobs_t iKnobs;
 static MFX_knobs_t *ipKnobs = &iKnobs;
 static uint8_t mFXState[STATE_SIZE];
@@ -75,9 +72,7 @@ int8_t msb_init()
 
 	LSM6DSO_FIFO_Set_Mode(&imu, 0);
 	LSM6DSO_ACC_Disable_Inactivity_Detection(&imu);
-#endif
 
-#ifdef MOTION_FX
 	/* Initialize Motion FX*/
 	motion_fx_init();
 #endif
@@ -211,9 +206,6 @@ int32_t imu_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
 		return hal_stat;
 	return 0;
 }
-#endif
-
-#ifdef MOTION_FX
 
 void motion_fx_init(void)
 {
@@ -258,5 +250,4 @@ void process_motion_fx(MFX_input_t *data_in, MFX_output_t *data_out,
 
 	MotionFX_update(mFXState, data_out, data_in, &delta_time, NULL);
 }
-
 #endif
