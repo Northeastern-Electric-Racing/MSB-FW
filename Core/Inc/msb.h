@@ -4,11 +4,12 @@
 
 #include "cmsis_os.h"
 #include "lsm6dso.h"
+#include "motion_fx.h"
+#include "msb_conf.h"
 #include "sht30.h"
 #include "stm32f405xx.h"
 #include "vl6180x_api.h"
 #include "vl6180x_platform.h"
-#include "msb_conf.h"
 
 typedef enum {
 	DEVICE_FRONT_LEFT,
@@ -43,6 +44,39 @@ void shockpot_read(uint32_t shockpot_sense);
 #ifdef SENSOR_STRAIN
 void strain1_read(uint32_t strain1);
 void strain2_read(uint32_t strain2);
+#endif
+
+#ifdef SENSOR_IMU
+
+// Motion FX Calibration and Memory Parameters
+
+/* 
+   Bias correction thresholds from MotionFX example implementations.
+   Lower GBIAS_* = more correction, higher = more stability.  
+   Adjust if drift or instability occurs.
+*/
+#define GBIAS_ACC_TH_SC	 (2.0f * 0.000765f)
+#define GBIAS_GYRO_TH_SC (2.0f * 0.002f)
+#define GBIAS_MAG_TH_SC	 0.0f
+
+/*
+   DECIMATION controls how often sensor data is processed.  
+   1U = use every sample, higher = skip samples  
+   Increase to ignore more samples if CPU usage is too high.
+*/
+#define DECIMATION 1U
+
+/*
+   STATE_SIZE is the memory required for MotionFX state.  
+   Retrieved by calling MotionFX_GetStateSize() at runtime.  
+   This value may change if library configuration or sensor settings are modified.
+*/
+#define STATE_SIZE (size_t)(2432)
+
+void motion_fx_init(void);
+void process_motion_fx(MFX_input_t *data_in, MFX_output_t *data_out,
+		       float delta_time);
+
 #endif
 
 #endif

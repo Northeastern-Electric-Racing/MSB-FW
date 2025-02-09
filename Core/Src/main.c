@@ -52,6 +52,8 @@ DMA_HandleTypeDef hdma_adc1;
 
 CAN_HandleTypeDef hcan1;
 
+CRC_HandleTypeDef hcrc;
+
 I2C_HandleTypeDef hi2c3;
 
 IWDG_HandleTypeDef hiwdg;
@@ -64,7 +66,7 @@ UART_HandleTypeDef huart2;
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = DEFAULT_TASK_STACK_SIZE,
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
@@ -82,6 +84,7 @@ static void MX_CAN1_Init(void);
 static void MX_I2C3_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_CRC_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -148,6 +151,7 @@ int main(void)
   MX_I2C3_Init();
   MX_SPI2_Init();
   MX_USART2_UART_Init();
+  MX_CRC_Init();
   /* USER CODE BEGIN 2 */
   printf("INIT MSB... FINDING ID");
   // determine MSB location
@@ -415,6 +419,32 @@ static void MX_CAN1_Init(void)
   /* USER CODE BEGIN CAN1_Init 2 */
 
   /* USER CODE END CAN1_Init 2 */
+
+}
+
+/**
+  * @brief CRC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_CRC_Init(void)
+{
+
+  /* USER CODE BEGIN CRC_Init 0 */
+
+  /* USER CODE END CRC_Init 0 */
+
+  /* USER CODE BEGIN CRC_Init 1 */
+
+  /* USER CODE END CRC_Init 1 */
+  hcrc.Instance = CRC;
+  if (HAL_CRC_Init(&hcrc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN CRC_Init 2 */
+
+  /* USER CODE END CRC_Init 2 */
 
 }
 

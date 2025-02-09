@@ -2,6 +2,7 @@
 #include "lsm6dso.h"
 #include "lsm6dso_reg.h"
 #include "main.h"
+#include "motion_fx.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,6 +37,9 @@ sht30_t temp_sensor;
 
 #ifdef SENSOR_IMU
 LSM6DSO_Object_t imu;
+static MFX_knobs_t iKnobs;
+static MFX_knobs_t *ipKnobs = &iKnobs;
+static uint8_t mFXState[STATE_SIZE];
 #endif
 
 #ifdef SENSOR_TOF
@@ -68,6 +72,9 @@ int8_t msb_init()
 
 	LSM6DSO_FIFO_Set_Mode(&imu, 0);
 	LSM6DSO_ACC_Disable_Inactivity_Detection(&imu);
+
+	/* Initialize Motion FX*/
+	motion_fx_init();
 #endif
 
 #ifdef SENSOR_TOF
@@ -198,5 +205,49 @@ int32_t imu_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
 	if (hal_stat)
 		return hal_stat;
 	return 0;
+}
+
+void motion_fx_init(void)
+{
+	if (STATE_SIZE < MotionFX_GetStateSize()) {
+		printf("Not enough memory allocated for MotionFX!!");
+		return;
+	}
+
+	MotionFX_initialize((MFXState_t *)mFXState);
+
+	MotionFX_getKnobs(mFXState, ipKnobs);
+
+	ipKnobs->acc_orientation[0] = 's';
+	ipKnobs->acc_orientation[1] = 'e';
+	ipKnobs->acc_orientation[2] = 'u';
+
+	ipKnobs->gyro_orientation[0] = 's';
+	ipKnobs->gyro_orientation[1] = 'e';
+	ipKnobs->gyro_orientation[2] = 'u';
+
+	ipKnobs->mag_orientation[0] = 'n';
+	ipKnobs->mag_orientation[1] = 'e';
+	ipKnobs->mag_orientation[2] = 'u';
+
+	ipKnobs->gbias_acc_th_sc = GBIAS_ACC_TH_SC;
+	ipKnobs->gbias_gyro_th_sc = GBIAS_GYRO_TH_SC;
+	ipKnobs->gbias_mag_th_sc = GBIAS_MAG_TH_SC;
+
+	ipKnobs->output_type = MFX_ENGINE_OUTPUT_ENU;
+	ipKnobs->LMode = 1;
+	ipKnobs->modx = DECIMATION;
+
+	MotionFX_setKnobs(mFXState, ipKnobs);
+
+	MotionFX_enable_6X(mFXState, MFX_ENGINE_ENABLE);
+}
+
+void process_motion_fx(MFX_input_t *data_in, MFX_output_t *data_out,
+		       float delta_time)
+{
+	MotionFX_propagate(mFXState, data_out, data_in, &delta_time);
+
+	MotionFX_update(mFXState, data_out, data_in, &delta_time, NULL);
 }
 #endif
