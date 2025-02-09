@@ -48,12 +48,29 @@ void strain2_read(uint32_t strain2);
 
 #ifdef SENSOR_IMU
 
+// Motion FX Calibration and Memory Parameters
+
+/* 
+   Bias correction thresholds from MotionFX example implementations.
+   Lower GBIAS_* = more correction, higher = more stability.  
+   Adjust if drift or instability occurs.
+*/
 #define GBIAS_ACC_TH_SC	 (2.0f * 0.000765f)
 #define GBIAS_GYRO_TH_SC (2.0f * 0.002f)
 #define GBIAS_MAG_TH_SC	 0.0f
 
+/*
+   DECIMATION controls how often sensor data is processed.  
+   1U = use every sample, higher = skip samples  
+   Increase to ignore more samples if CPU usage is too high.
+*/
 #define DECIMATION 1U
 
+/*
+   STATE_SIZE is the memory required for MotionFX state.  
+   Retrieved by calling MotionFX_GetStateSize() at runtime.  
+   This value may change if library configuration or sensor settings are modified.
+*/
 #define STATE_SIZE (size_t)(2432)
 
 void motion_fx_init(void);
