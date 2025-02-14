@@ -17,8 +17,6 @@ typedef enum {
 } device_loc_t;
 
 int8_t msb_init();
-Write_ptr sht30_i2c_write(sht3x_command_t command);
-Read_ptr sht30_i2c_read();
 
 
 #ifdef SENSOR_TEMP
