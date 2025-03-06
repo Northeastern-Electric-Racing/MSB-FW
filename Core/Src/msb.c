@@ -65,7 +65,6 @@ int8_t msb_init()
 {
 #ifdef SENSOR_TEMP
 	/* Initialize the Onboard Temperature Sensor */
-	sht30_t temp_sensor;
 	assert(!sht30_init(&temp_sensor, (Write_ptr) sht30_i2c_write, (Read_ptr) sht30_i2c_read,
 			   (SHT30_I2C_ADDR))); /* This is always connected */
 #endif
