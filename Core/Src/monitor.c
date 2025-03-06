@@ -4,6 +4,7 @@
 #include "cmsis_os.h"
 #include "msb.h"
 #include "msb_conf.h"
+#include "sht30.h"
 
 #include "stm32f405xx.h"
 #include <stdio.h>
@@ -46,12 +47,12 @@ void vTempMonitor(void *pv_params)
 				      .data = { 0 } };
 
 	struct __attribute__((__packed__)) {
-		uint16_t temp;
-		uint16_t humidity;
+		float temp;
+		float humidity;
 	} temp_sensor_data;
 
-	uint16_t temp_dat = 0;
-	uint16_t humidity_dat = 0;
+	float temp_dat = 0;
+	float humidity_dat = 0;
 
 	for (;;) {
 		if (central_temp_measure(&temp_dat, &humidity_dat)) {
@@ -62,8 +63,8 @@ void vTempMonitor(void *pv_params)
 		temp_sensor_data.humidity = humidity_dat;
 
 #ifdef LOG_VERBOSE
-		printf("Board Temperature:\t%d\r\n", temp_sensor_data.temp);
-		printf("Board Humidity:\t%d\r\n", temp_sensor_data.humidity);
+		printf("Board Temperature:\t%f\r\n", temp_sensor_data.temp);
+		printf("Board Humidity:\t%f\r\n", temp_sensor_data.humidity);
 #endif
 
 		endian_swap(&temp_sensor_data.temp,

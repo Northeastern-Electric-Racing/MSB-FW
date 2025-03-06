@@ -48,14 +48,14 @@ uint32_t adc1_buf[3];
 #endif
 
 static inline uint8_t sht30_i2c_write(uint8_t *data, uint8_t dev_address,
-				      uint8_t reg, uint8_t length)
+				       uint8_t length)
 {
-	return HAL_I2C_Mem_Write(&hi2c3, dev_address, reg, I2C_MEMADD_SIZE_8BIT,
-				 data, length, HAL_MAX_DELAY);
+	return HAL_I2C_Master_Transmit(&hi2c3, dev_address,
+		data, length, HAL_MAX_DELAY);
 }
 
 static inline uint8_t sht30_i2c_read(uint8_t *data, uint8_t dev_address,
-				     uint8_t reg, uint8_t length)
+				     uint16_t reg, uint8_t length)
 {
 	return HAL_I2C_Mem_Read(&hi2c3, dev_address, reg, I2C_MEMADD_SIZE_8BIT,
 				data, length, HAL_MAX_DELAY);
@@ -66,8 +66,7 @@ int8_t msb_init()
 #ifdef SENSOR_TEMP
 	/* Initialize the Onboard Temperature Sensor */
 	sht30_t temp_sensor;
-	assert(!sht30_init(&temp_sensor, (Read_ptr)sht30_i2c_read,
-			   (Write_ptr)sht30_i2c_write,
+	assert(!sht30_init(&temp_sensor, (Write_ptr) sht30_i2c_write, (Read_ptr) sht30_i2c_read,
 			   (SHT30_I2C_ADDR))); /* This is always connected */
 #endif
 
@@ -85,7 +84,7 @@ int8_t msb_init()
 	LSM6DSO_ACC_Disable_Inactivity_Detection(&imu);
 #endif
 
-#ifdef SENSOR_TOFsht30_t
+#ifdef SENSOR_TOF
 	/* Initialize the ToF sensor */
 	struct MyDev_t tof_get = {
 		.i2c_bus_num = 0x29 << 1,
@@ -115,13 +114,13 @@ int8_t msb_init()
 /// @brief Measure the temperature and humidity of central MSB SHT30
 /// @param out
 /// @return error code
-int8_t central_temp_measure(uint16_t *temp, uint16_t *humidity)
+int8_t central_temp_measure(float *temp, float *humidity)
 {
 	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
 	if (mut_stat)
 		return mut_stat;
 
-	int status = sht30_get_temp_humid(&temp_sensor);
+	uint8_t status = sht30_get_temp_humid(&temp_sensor);
 	if (status)
 		return status;
 

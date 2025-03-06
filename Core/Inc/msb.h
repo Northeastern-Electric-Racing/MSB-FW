@@ -19,7 +19,7 @@ typedef enum {
 int8_t msb_init();
 
 #ifdef SENSOR_TEMP
-int8_t central_temp_measure(uint16_t *temp, uint16_t *humidity);
+int8_t central_temp_measure(float *temp, float *humidity);
 #endif
 
 #ifdef SENSOR_TOF
