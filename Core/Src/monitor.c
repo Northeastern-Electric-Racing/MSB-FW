@@ -128,6 +128,21 @@ void vIMUMonitor(void *pv_params)
 	lsm6dso_md_t imu_md_temp;
 	lsm6dso_data_t imu_data_temp;
 
+	can_msg_t imu_orientation_msg = {
+		.id = convert_can(CANID_IMU_ORIENTATION, device_loc),
+		.len = 6,
+		.data = { 0 }
+	};
+
+	MFX_input_t mFXInput;
+	MFX_output_t mFXOutput;
+
+	struct __attribute__((__packed__)) {
+		int16_t roll;
+		int16_t pitch;
+		int16_t yaw;
+	} orientation_data;
+
 	/* Add parameters for formatting data */
 	imu_md_temp.ui.gy.fs = LSM6DSO_500dps;
 	imu_md_temp.ui.gy.odr = LSM6DSO_GY_UI_52Hz_LP;
@@ -150,11 +165,38 @@ void vIMUMonitor(void *pv_params)
 		gyro_data.gyro_z = imu_data_temp.ui.gy.mdps[2];
 		temperature_data.temp = imu_data_temp.ui.heat.deg_c;
 
+		// Acc (Convert mg to g)
+		mFXInput.acc[0] = (float)(imu_data_temp.ui.xl.mg[0] / 1000.0f);
+		mFXInput.acc[1] = (float)(imu_data_temp.ui.xl.mg[1] / 1000.0f);
+		mFXInput.acc[2] = (float)(imu_data_temp.ui.xl.mg[2] / 1000.0f);
+
+		// Gyro (Convert mdps to dps)
+		mFXInput.gyro[0] =
+			(float)(imu_data_temp.ui.gy.mdps[0] * 0.001f);
+		mFXInput.gyro[1] =
+			(float)(imu_data_temp.ui.gy.mdps[1] * 0.001f);
+		mFXInput.gyro[2] =
+			(float)(imu_data_temp.ui.gy.mdps[2] * 0.001f);
+
+		// Magnetometer
+		mFXInput.mag[0] = 0.0f;
+		mFXInput.mag[1] = 0.0f;
+		mFXInput.mag[2] = 0.0f;
+
+		process_motion_fx(&mFXInput, &mFXOutput, 0.05f);
+
+		orientation_data.yaw = (int16_t)mFXOutput.rotation[0];
+		orientation_data.pitch = (int16_t)mFXOutput.rotation[1];
+		orientation_data.roll = (int16_t)mFXOutput.rotation[2];
+
 #ifdef LOG_VERBOSE
 		printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,
 		       accel_data.accel_y, accel_data.accel_z);
 		printf("IMU Gyro x: %d y: %d z: %d \r\n", gyro_data.gyro_x,
 		       gyro_data.gyro_y, gyro_data.gyro_z);
+		printf("IMU Orientation Yaw: %d Pitch: %d Roll: %d \r\n",
+		       orientation_data.yaw, orientation_data.pitch,
+		       orientation_data.roll);
 		printf("IMU Temp: %3.2f °C \r\n", temperature_data.temp);
 #endif
 
@@ -165,6 +207,12 @@ void vIMUMonitor(void *pv_params)
 		endian_swap(&gyro_data.gyro_x, sizeof(gyro_data.gyro_x));
 		endian_swap(&gyro_data.gyro_y, sizeof(gyro_data.gyro_y));
 		endian_swap(&gyro_data.gyro_z, sizeof(gyro_data.gyro_z));
+		endian_swap(&orientation_data.roll,
+			    sizeof(orientation_data.roll));
+		endian_swap(&orientation_data.pitch,
+			    sizeof(orientation_data.pitch));
+		endian_swap(&orientation_data.yaw,
+			    sizeof(orientation_data.yaw));
 
 		/* Send CAN message */
 		memcpy(imu_accel_msg.data, &accel_data, imu_accel_msg.len);
@@ -174,6 +222,12 @@ void vIMUMonitor(void *pv_params)
 
 		memcpy(imu_gyro_msg.data, &gyro_data, imu_gyro_msg.len);
 		if (queue_can_msg(imu_gyro_msg)) {
+			printf("Failed to send CAN message\r\n");
+		}
+
+		memcpy(imu_orientation_msg.data, &orientation_data,
+		       imu_orientation_msg.len);
+		if (queue_can_msg(imu_orientation_msg)) {
 			printf("Failed to send CAN message\r\n");
 		}
 
