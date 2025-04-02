@@ -32,14 +32,12 @@
 #define CAN_ENABLE
 
 // on central
-#define SENSOR_TEMP
-#define SENSOR_SHOCKPOT
-#define SENSOR_STRAIN
-// #define SENSOR_TOF
+#define SENSOR_TEMP	// SHT30
+#define SENSOR_SHOCKPOT // ADC1
+#define SENSOR_STRAIN	// ADC1
+// #define SENSOR_TOF       // VL6180X
 
-//jake #define SENSOR_IMU
-// on knuckle or /wheel
-// #define SENSOR_WHEEL_TEMP
+#define SENSOR_IMU // LSM6DSO
 
 // VERBOSE LOGGING
 #define LOG_VERBOSE
