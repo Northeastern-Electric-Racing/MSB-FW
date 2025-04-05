@@ -63,10 +63,12 @@ void vTempMonitor(void *pv_params)
 		temp_sensor_data.humidity = humidity_dat;
 
 #ifdef LOG_VERBOSE
-		printf("Board Temperature:\t%d\r\n", (uint16_t)(temp_sensor_data.temp * 100) / 100);
-		printf("Board Humidity:\t%d\r\n", (uint16_t)(temp_sensor_data.humidity * 100) / 100);
+		printf("Board Temperature:\t%d\r\n",
+		       (uint16_t)(temp_sensor_data.temp * 100) / 100);
+		printf("Board Humidity:\t%d\r\n",
+		       (uint16_t)(temp_sensor_data.humidity * 100) / 100);
 #endif
-		
+
 		endian_swap(&temp_sensor_data.temp,
 			    sizeof(temp_sensor_data.temp));
 		endian_swap(&temp_sensor_data.humidity,
