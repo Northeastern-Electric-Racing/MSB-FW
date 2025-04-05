@@ -61,16 +61,18 @@ static inline uint8_t sht30_i2c_write(uint8_t *data, uint8_t dev_address,
 static inline uint8_t sht30_i2c_read(uint8_t *data, uint16_t command,
 				     uint8_t dev_address, uint8_t length)
 {
-	return HAL_I2C_Mem_Read(&hi2c3, SHT30_I2C_ADDR, command,
-				sizeof(command), data, length, HAL_MAX_DELAY);
+	return HAL_I2C_Mem_Read(&hi2c3, dev_address, command, sizeof(command),
+				data, length, HAL_MAX_DELAY);
 }
 
+// blocking read uses master transmit (in blocking mode)
 static inline uint8_t sht30_i2c_blocking_read(uint8_t *data, uint16_t command,
 					      uint8_t dev_address,
 					      uint8_t length)
-{
+{	
 	uint8_t command_buffer[2] = { (command & 0xff00u) >> 8u,
 				      command & 0xffu };
+	// write command to sht30 before reading
 	sht30_i2c_write(command_buffer, dev_address, sizeof(command_buffer));
 	HAL_Delay(1); // 1 ms delay to ensure sht30 returns to idle state
 	return HAL_I2C_Master_Receive(&hi2c3, dev_address, data, length,
