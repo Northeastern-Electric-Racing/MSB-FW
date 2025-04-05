@@ -53,16 +53,23 @@ uint32_t adc1_buf[3];
 
 static inline uint8_t sht30_i2c_write(uint8_t *data, uint8_t dev_address,
 				      uint8_t length)
-{
+{	
+	printf("address: %d\n", dev_address);
+	printf("length: %d\n", length);
+
 	return HAL_I2C_Master_Transmit(&hi2c3, dev_address, data, length,
 				       HAL_MAX_DELAY);
 }
 
 static inline uint8_t sht30_i2c_read(uint8_t *data, uint8_t dev_address,
-				     uint16_t reg, uint8_t length)
+				     uint8_t length)
 {
-	return HAL_I2C_Mem_Read(&hi2c3, dev_address, reg, I2C_MEMADD_SIZE_8BIT,
-				data, length, HAL_MAX_DELAY);
+	printf("address: %d\n", dev_address);
+	printf("length: %d\n", length);
+
+	HAL_Delay(1); // 1 ms delay to ensure sht30 returns to idle state
+	return HAL_I2C_Master_Receive(&hi2c3, dev_address, data, length,
+				      HAL_MAX_DELAY);
 }
 
 int8_t msb_init()
