@@ -29,13 +29,13 @@
 // Sensors to use, comment out to disable
 
 // internal
-#define CAN_ENABLE
+// #define CAN_ENABLE
 
 // on central
 #define SENSOR_TEMP	// SHT30
 #define SENSOR_SHOCKPOT // ADC1
 #define SENSOR_STRAIN	// ADC1
-// #define SENSOR_TOF       // VL6180X
+#define SENSOR_TOF       // VL6180X
 
 #define SENSOR_IMU // LSM6DSO
 
