@@ -192,6 +192,7 @@ int main(void)
   // determine the configuration of the device
 
   msb_init();
+  vcc5_en_write(true);
   can1_init();
 
   /* USER CODE END RTOS_MUTEX */
