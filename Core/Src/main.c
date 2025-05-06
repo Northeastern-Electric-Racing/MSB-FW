@@ -621,8 +621,15 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, VCC5_En_Pin|Debug_LED_1_Pin|Debug_LED_2_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : VCC5_En_Pin Debug_LED_1_Pin Debug_LED_2_Pin */
-  GPIO_InitStruct.Pin = VCC5_En_Pin|Debug_LED_1_Pin|Debug_LED_2_Pin;
+  /*Configure GPIO pin : VCC5_En_Pin */
+  GPIO_InitStruct.Pin = VCC5_En_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(VCC5_En_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : Debug_LED_1_Pin Debug_LED_2_Pin */
+  GPIO_InitStruct.Pin = Debug_LED_1_Pin|Debug_LED_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
