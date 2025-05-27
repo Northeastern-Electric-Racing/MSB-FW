@@ -17,9 +17,7 @@
 #include "can.h"
 #include "cmsis_os.h"
 
-//void can1_callback(CAN_HandleTypeDef *hcan);
-
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
+void can1_callback(CAN_HandleTypeDef *hcan);
 
 void vCanDispatch(void *pv_params);
 extern osThreadId_t can_dispatch_handle;

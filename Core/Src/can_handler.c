@@ -45,13 +45,11 @@ void can1_init()
 	switch (device_loc) {
 	case DEVICE_FRONT_LEFT:
 		id_list[0] = CANID_IMUZERO_FRONTLEFT;
-	case:
-DEVICE_FRONT_RIGHT:
+	case DEVICE_FRONT_RIGHT:
 		id_list[0] = CANID_IMUZERO_FRONTRIGHT;
 	case DEVICE_BACK_LEFT:
 		id_list[0] = CANID_IMUZERO_BACKLEFT;
-	case:
-DEVICE_BACK_RIGHT:
+	case DEVICE_BACK_RIGHT:
 		id_list[0] = CANID_IMUZERO_BACKRIGHT;
 	}
 
