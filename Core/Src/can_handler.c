@@ -12,6 +12,7 @@
 #include "can_handler.h"
 #include "can.h"
 #include "msb_conf.h"
+#include "msb.h"
 
 #include "stdio.h"
 #include <assert.h>
@@ -20,10 +21,14 @@
 
 #define CAN_MSG_QUEUE_SIZE 25 /* messages */
 static osMessageQueueId_t can_outbound_queue;
+static osMessageQueueId_t can_inbound_queue;
 
-static uint16_t id_list[4] = { 0x000, 0x000, 0x000, 0x002 };
+static uint16_t id_list[4] = {
+	0x000, 0x000, 0x000, 0x002
+}; // id_list[0] is reserved for the IMU Zero CAN ID, which is added in can1_init().
 
 extern CAN_HandleTypeDef hcan1;
+extern device_loc_t device_loc;
 
 can_t *can1;
 
@@ -35,11 +40,56 @@ void can1_init()
 
 	can1->hcan = &hcan1;
 	assert(!can_init(can1));
+
+	/* Add the correct IMU Zero CAN ID to the filter depending on the location of the MSB. */
+	switch (device_loc) {
+	case DEVICE_FRONT_LEFT:
+		id_list[0] = CANID_IMUZERO_FRONTLEFT;
+	case:
+DEVICE_FRONT_RIGHT:
+		id_list[0] = CANID_IMUZERO_FRONTRIGHT;
+	case DEVICE_BACK_LEFT:
+		id_list[0] = CANID_IMUZERO_BACKLEFT;
+	case:
+DEVICE_BACK_RIGHT:
+		id_list[0] = CANID_IMUZERO_BACKRIGHT;
+	}
+
 	assert(!can_add_filter_standard(can1, id_list));
 #endif
 
 	can_outbound_queue =
 		osMessageQueueNew(CAN_MSG_QUEUE_SIZE, sizeof(can_msg_t), NULL);
+	can_inbound_queue =
+		osMessageQueueNew(CAN_MSG_QUEUE_SIZE, sizeof(can_msg_t), NULL);
+}
+
+/* Callback to be called when we get a CAN message */
+void can1_callback(CAN_HandleTypeDef *hcan)
+{
+	CAN_RxHeaderTypeDef rx_header;
+	can_msg_t new_msg;
+
+	/* Read in CAN message */
+	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header,
+				 new_msg.data) != HAL_OK) {
+		printf("Failed to recieve CAN message.\n");
+		return;
+	}
+
+	new_msg.len = rx_header.DLC;
+
+	if (rx_header.IDE == CAN_ID_EXT) {
+		// If the message has an extended CAN ID, save the message accordingly.
+		new_msg.id = rx_header.ExtId;
+		new_msg.id_is_extended = true;
+	} else {
+		// If the message has a standard CAN ID, save the message accordingly.
+		new_msg.id = rx_header.StdId;
+		new_msg.id_is_extended = false;
+	}
+
+	osMessageQueuePut(can_inbound_queue, &new_msg, 0U, 0U);
 }
 
 osThreadId_t can_dispatch_handle;
@@ -85,4 +135,33 @@ int8_t queue_can_msg(can_msg_t msg)
 
 	osMessageQueuePut(can_outbound_queue, &msg, 0U, 0U);
 	return 0;
+}
+
+osThreadId_t can_receive_thread;
+const osThreadAttr_t can_receive_attributes = {
+	.name = "CanProcessing",
+	.stack_size = 128 * 8,
+	.priority = (osPriority_t)osPriorityRealtime,
+};
+
+void vCanReceive(void *pv_params)
+{
+	can_msg_t msg;
+
+	for (;;) {
+		while (osOK ==
+		       osMessageQueueGet(can_inbound_queue, &msg, 0U, 0U)) {
+			switch (msg.id) {
+			case CANID_IMUZERO_BACKLEFT ||
+				CANID_IMUZERO_BACKRIGHT ||
+				CANID_IMUZERO_FRONTLEFT ||
+				CANID_IMUZERO_FRONTRIGHT:
+				// do thing()
+				// also don't need to check device_loc here since only the correct CANID should be added to the filter
+				break;
+			default:
+				break;
+			}
+		}
+	}
 }

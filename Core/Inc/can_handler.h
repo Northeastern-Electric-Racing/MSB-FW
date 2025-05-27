@@ -19,9 +19,15 @@
 
 //void can1_callback(CAN_HandleTypeDef *hcan);
 
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
+
 void vCanDispatch(void *pv_params);
 extern osThreadId_t can_dispatch_handle;
 extern const osThreadAttr_t can_dispatch_attributes;
+
+void vCanReceive(void *pv_params);
+extern osThreadId_t can_receive_thread;
+extern const osThreadAttr_t can_receive_attributes;
 
 int8_t queue_can_msg(can_msg_t msg);
 void can1_init();

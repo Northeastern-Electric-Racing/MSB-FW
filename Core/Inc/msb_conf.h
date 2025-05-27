@@ -25,6 +25,10 @@
 #define CANID_TOF	      0x607
 #define CANID_WHEEL_TEMP      0x608
 #define CANID_IMU_ORIENTATION 0x609
+#define CANID_IMUZERO_FRONTLEFT 0x60A
+#define CANID_IMUZERO_FRONTRIGHT 0x60B
+#define CANID_IMUZERO_BACKLEFT 0x60C
+#define CANID_IMUZERO_BACKRIGHT 0x60D
 
 // Sensors to use, comment out to disable
 

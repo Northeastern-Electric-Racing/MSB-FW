@@ -233,6 +233,9 @@ int main(void)
   /* add queues, ... */
   can_dispatch_handle = osThreadNew(vCanDispatch, NULL, &can_dispatch_attributes);
   assert(can_dispatch_handle);
+
+  can_receive_thread = osThreadNew(vCanReceive, NULL, &can_receive_attributes);
+  assert(can_receive_thread);
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
