@@ -75,7 +75,7 @@ void can1_callback(CAN_HandleTypeDef *hcan)
 	/* Read in CAN message */
 	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header,
 				 new_msg.data) != HAL_OK) {
-		printf("Failed to recieve CAN message.\n");
+		printf("Failed to receive CAN message.\n");
 		return;
 	}
 
