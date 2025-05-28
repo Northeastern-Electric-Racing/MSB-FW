@@ -250,4 +250,21 @@ void process_motion_fx(MFX_input_t *data_in, MFX_output_t *data_out,
 
 	MotionFX_update(mFXState, data_out, data_in, &delta_time, NULL);
 }
+
+float imu_rotation_data[3] = {
+	0.0f, 0.0f, 0.0f
+}; /* Yaw, pitch, and roll. Updated by vIMUMonitor(). */
+float imu_zero_reference[3] = {
+	0.0f, 0.0f, 0.0f
+}; /* Reference values for zeroing IMU data. Defaults to 0 (i.e. no zeroing by default)*/
+void imu_zero()
+{
+	/* Stores the current IMU rotation data in imu_zero_reference. These values will be subtracted from future mFXOutput.rotation data in vIMUMonitor(). */
+	imu_zero_reference[0] = imu_rotation_data[0];
+	imu_zero_reference[1] = imu_rotation_data[1];
+	imu_zero_reference[2] = imu_rotation_data[2];
+	printf("IMU zeroed to: Yaw: %f, Pitch: %f, Roll: %f\r\n",
+	       imu_zero_reference[0], imu_zero_reference[1],
+	       imu_zero_reference[2]);
+}
 #endif

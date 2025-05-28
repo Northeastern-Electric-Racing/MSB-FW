@@ -45,12 +45,16 @@ void can1_init()
 	switch (device_loc) {
 	case DEVICE_FRONT_LEFT:
 		id_list[0] = CANID_IMUZERO_FRONTLEFT;
+		break;
 	case DEVICE_FRONT_RIGHT:
 		id_list[0] = CANID_IMUZERO_FRONTRIGHT;
+		break;
 	case DEVICE_BACK_LEFT:
 		id_list[0] = CANID_IMUZERO_BACKLEFT;
+		break;
 	case DEVICE_BACK_RIGHT:
 		id_list[0] = CANID_IMUZERO_BACKRIGHT;
+		break;
 	}
 
 	assert(!can_add_filter_standard(can1, id_list));
@@ -150,12 +154,13 @@ void vCanReceive(void *pv_params)
 		while (osOK ==
 		       osMessageQueueGet(can_inbound_queue, &msg, 0U, 0U)) {
 			switch (msg.id) {
-			case CANID_IMUZERO_BACKLEFT ||
-				CANID_IMUZERO_BACKRIGHT ||
-				CANID_IMUZERO_FRONTLEFT ||
-				CANID_IMUZERO_FRONTRIGHT:
-				// do thing()
-				// also don't need to check device_loc here since only the correct CANID should be added to the filter
+			case CANID_IMUZERO_BACKLEFT:
+			case CANID_IMUZERO_BACKRIGHT:
+			case CANID_IMUZERO_FRONTLEFT:
+			case CANID_IMUZERO_FRONTRIGHT:
+				if (msg.data[0] > 0) {
+					imu_zero();
+				}
 				break;
 			default:
 				break;

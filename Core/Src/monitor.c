@@ -13,6 +13,8 @@
 #include "monitor.h"
 
 extern device_loc_t device_loc;
+extern float imu_rotation_data[3];
+extern float imu_zero_reference[3];
 
 uint16_t convert_can(uint16_t original_value, device_loc_t mode)
 {
@@ -184,9 +186,16 @@ void vIMUMonitor(void *pv_params)
 
 		process_motion_fx(&mFXInput, &mFXOutput, 0.05f);
 
-		orientation_data.yaw = (int16_t)mFXOutput.rotation[0];
-		orientation_data.pitch = (int16_t)mFXOutput.rotation[1];
-		orientation_data.roll = (int16_t)mFXOutput.rotation[2];
+		imu_rotation_data[0] = mFXOutput.rotation[0]; // Yaw
+		imu_rotation_data[1] = mFXOutput.rotation[1]; // Pitch
+		imu_rotation_data[2] = mFXOutput.rotation[2]; // Roll
+
+		orientation_data.yaw = (int16_t)(mFXOutput.rotation[0] -
+						 imu_zero_reference[0]);
+		orientation_data.pitch = (int16_t)(mFXOutput.rotation[1] -
+						   imu_zero_reference[1]);
+		orientation_data.roll = (int16_t)(mFXOutput.rotation[2] -
+						  imu_zero_reference[2]);
 
 #ifdef LOG_VERBOSE
 		printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,
