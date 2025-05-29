@@ -76,6 +76,7 @@ void strain2_read(uint32_t strain2);
 void motion_fx_init(void);
 void process_motion_fx(MFX_input_t *data_in, MFX_output_t *data_out,
 		       float delta_time);
+void imu_zero(uint8_t yaw_byte, uint8_t pitch_byte, uint8_t roll_byte);
 
 #endif
 
