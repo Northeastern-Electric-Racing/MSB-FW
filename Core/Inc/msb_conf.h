@@ -28,7 +28,7 @@
 #define CANID_IMUZERO_FRONTLEFT	 0x60A
 #define CANID_IMUZERO_FRONTRIGHT 0x60B
 #define CANID_IMUZERO_BACKLEFT	 0x60C
-#define CANID_IMUZERO_BACKRIGHT	 0x60D
+#define CANID_IMUZERO_BACKRIGHT	 0x60E
 
 // Sensors to use, comment out to disable
 
