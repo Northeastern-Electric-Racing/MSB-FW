@@ -190,10 +190,18 @@ void vIMUMonitor(void *pv_params)
 		imu_rotation_data[1] = mFXOutput.rotation[1]; // Pitch
 		imu_rotation_data[2] = mFXOutput.rotation[2]; // Roll
 
-		orientation_data.yaw = (int16_t)(mFXOutput.rotation[0] -
-						 imu_zero_reference[0]);
+		/* Handle yaw zeroing */
+		float diff = mFXOutput.rotation[0] - imu_zero_reference[0];
+		if (diff < 0.0f) {
+			diff += 360.0f; // Make sure all yaw data is in the 0 to 360 degree range.
+		}
+		orientation_data.yaw = (int16_t)diff;
+
+		/* Handle pitch zeroing */
 		orientation_data.pitch = (int16_t)(mFXOutput.rotation[1] -
 						   imu_zero_reference[1]);
+
+		/* Handle roll zeroing */
 		orientation_data.roll = (int16_t)(mFXOutput.rotation[2] -
 						  imu_zero_reference[2]);
 
