@@ -158,9 +158,7 @@ void vCanReceive(void *pv_params)
 			case CANID_IMUZERO_BACKRIGHT:
 			case CANID_IMUZERO_FRONTLEFT:
 			case CANID_IMUZERO_FRONTRIGHT:
-				if (msg.data[0] > 0) {
-					imu_zero();
-				}
+				imu_zero(msg.data[0], msg.data[1], msg.data[2]);
 				break;
 			default:
 				break;
