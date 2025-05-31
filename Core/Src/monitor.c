@@ -287,10 +287,16 @@ void vShockpotMonitor(void *pv_params)
 {
 	can_msg_t shockpot_msg = { .id = convert_can(CANID_SHOCK_SENSE,
 						     device_loc),
-				   .len = 4,
+				   .len = 6,
 				   .data = { 0 } };
 
 	uint32_t shock_value = 0;
+
+	struct __attribute__((__packed__)) {
+		float in;
+		uint16_t raw;
+	} shockpot_data;
+
 
 	for (;;) {
 		shockpot_read(&shock_value);
@@ -298,14 +304,15 @@ void vShockpotMonitor(void *pv_params)
 #ifdef LOG_VERBOSE
 		printf("Shock value:\t%ld\r\n", shock_value);
 #endif
+		//printf("Shock value:\t%ld\r\n", shock_value);
+
 		// convert to inches, get percent and multiply by 50 mm (stroke length) then convert to inches
-		float in = (shock_value / 4095.0) * 54.44 * (1/25.4);
-		printf("Shock value:\t%f\n", in);
+		float in = (shock_value / 4095.0) * 54.44 * (1/25.4);	
 		
+		shockpot_data.in = in;
+		shockpot_data.raw = shock_value;
 
-		endian_swap(&shock_value, sizeof(shock_value));
-
-		memcpy(shockpot_msg.data, &shock_value, shockpot_msg.len);
+		memcpy(shockpot_msg.data, &shockpot_data, shockpot_msg.len);
 		/* Send CAN message */
 		if (queue_can_msg(shockpot_msg)) {
 			printf("Failed to send CAN message\r\n");
