@@ -6,7 +6,7 @@
 // MONITOR
 #define DELAY_TEMP_SENSOR_REFRESH 500
 #define DELAY_IMU_REFRESH	  50
-#define DELAY_SHOCKPOT_REFRESH	  500
+#define DELAY_SHOCKPOT_REFRESH	  5
 #define DELAY_STRAIN_REFRESH	  500
 #define DELAY_TOF_REFRESH	  500
 #define DELAY_WHEEL_TEMP_REFRESH  500
@@ -34,13 +34,13 @@
 // on central
 #define SENSOR_TEMP	// SHT30
 #define SENSOR_SHOCKPOT // ADC1
-#define SENSOR_STRAIN	// ADC1
-#define SENSOR_TOF       // VL6180X
+//#define SENSOR_STRAIN	// ADC1
+//#define SENSOR_TOF       // VL6180X
 
-#define SENSOR_IMU // LSM6DSO
+//#define SENSOR_IMU // LSM6DSO
 
 // VERBOSE LOGGING
-#define LOG_VERBOSE
+//#define LOG_VERBOSE
 
 // Note
 // STACK SIZES
@@ -50,5 +50,5 @@
 #define TEMP_MONITOR_STACK_SIZE	    64 * 16 // temp_monitor_handle
 #define IMU_MONITOR_STACK_SIZE	    128 * 32 // imu_monitor_handle
 #define TOF_MONITOR_STACK_SIZE	    128 * 8 // tof_monitor_handle
-#define SHOCKPOT_MONITOR_STACK_SIZE 64 * 8 // shockpot_monitor_handle
+#define SHOCKPOT_MONITOR_STACK_SIZE 128 * 8 // shockpot_monitor_handle
 #define STRAIN_MONITOR_STACK_SIZE   64 * 8 // strain_monitor_handle

@@ -293,11 +293,15 @@ void vShockpotMonitor(void *pv_params)
 	uint32_t shock_value = 0;
 
 	for (;;) {
-		shockpot_read(shock_value);
+		shockpot_read(&shock_value);
 
 #ifdef LOG_VERBOSE
 		printf("Shock value:\t%ld\r\n", shock_value);
 #endif
+		// convert to inches, get percent and multiply by 50 mm (stroke length) then convert to inches
+		float in = (shock_value / 4095.0) * 54.44 * (1/25.4);
+		printf("Shock value:\t%f\n", in);
+		
 
 		endian_swap(&shock_value, sizeof(shock_value));
 

@@ -134,21 +134,21 @@ void adc1_read(uint32_t result_buf[3])
 #endif
 
 #ifdef SENSOR_SHOCKPOT
-void shockpot_read(uint32_t shockpot_sense)
+void shockpot_read(uint32_t *shockpot_sense)
 {
-	memcpy((uint32_t *)shockpot_sense, adc1_buf, sizeof(shockpot_sense));
+	memcpy(shockpot_sense, adc1_buf, sizeof(shockpot_sense));
 }
 #endif
 
 #ifdef SENSOR_STRAIN
-void strain1_read(uint32_t strain1)
+void strain1_read(uint32_t *strain1)
 {
-	memcpy((uint32_t *)strain1, adc1_buf + 1, sizeof(strain1));
+	memcpy(strain1, adc1_buf + 1, sizeof(strain1));
 }
 
-void strain2_read(uint32_t strain2)
+void strain2_read(uint32_t *strain2)
 {
-	memcpy((uint32_t *)strain2, adc1_buf + 2, sizeof(strain2));
+	memcpy(strain2, adc1_buf + 2, sizeof(strain2));
 }
 #endif
 
