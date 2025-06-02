@@ -62,6 +62,10 @@ void vCanDispatch(void *pv_params)
 					      &msg_from_queue, NULL,
 					      osWaitForever)) {
 #ifdef CAN_ENABLE
+while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0) {
+				osDelay(1);
+			}
+
 			msg_status = can_send_msg(can1, &msg_from_queue);
 			if (msg_status != HAL_OK) {
 				printf("Failed to send CAN message");

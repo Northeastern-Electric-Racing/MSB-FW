@@ -5,7 +5,7 @@
 
 // MONITOR
 #define DELAY_TEMP_SENSOR_REFRESH 500
-#define DELAY_IMU_REFRESH	  50
+#define DELAY_IMU_REFRESH	  10
 #define DELAY_SHOCKPOT_REFRESH	  5
 #define DELAY_STRAIN_REFRESH	  500
 #define DELAY_TOF_REFRESH	  500
@@ -29,7 +29,7 @@
 // Sensors to use, comment out to disable
 
 // internal
-// #define CAN_ENABLE
+#define CAN_ENABLE
 
 // on central
 #define SENSOR_TEMP	// SHT30
@@ -37,7 +37,7 @@
 //#define SENSOR_STRAIN	// ADC1
 //#define SENSOR_TOF       // VL6180X
 
-//#define SENSOR_IMU // LSM6DSO
+#define SENSOR_IMU // LSM6DSO
 
 // VERBOSE LOGGING
 //#define LOG_VERBOSE

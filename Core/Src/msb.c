@@ -64,11 +64,12 @@ int8_t msb_init()
 	/* Initialize the IMU */
 	assert(!LSM6DSO_Init(&imu)); /* This is always connected */
 
-	/* Setup IMU Accelerometer */
+	/* Setup IMU Accelerometer - default 104Hz */
 	LSM6DSO_ACC_Enable(&imu);
-
 	/* Setup IMU Gyroscope */
 	LSM6DSO_GYRO_Enable(&imu);
+
+	LSM6DSO_ACC_Set_Filter_Mode(&imu, 0, 4);
 
 	LSM6DSO_FIFO_Set_Mode(&imu, 0);
 	LSM6DSO_ACC_Disable_Inactivity_Detection(&imu);

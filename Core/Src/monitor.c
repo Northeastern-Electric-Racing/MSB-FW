@@ -310,6 +310,7 @@ void vShockpotMonitor(void *pv_params)
 		float in = (shock_value / 4095.0) * 54.44 * (1/25.4);	
 		
 		shockpot_data.in = in;
+		endian_swap(&shockpot_data.in, sizeof(shockpot_data.in));
 		shockpot_data.raw = shock_value;
 
 		memcpy(shockpot_msg.data, &shockpot_data, shockpot_msg.len);
