@@ -16,20 +16,19 @@ extern device_loc_t device_loc;
 
 osMutexId_t i2c_mutex;
 
-// reads imu reg
-
+// overriden functions
 int32_t lsm6dso_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data,
-			 uint16_t len)
+						 uint16_t len)
 {
 	return HAL_I2C_Mem_Read(&hi2c3, LSM6DSO_I2C_ADD_L, reg,
-				I2C_MEMADD_SIZE_8BIT, data, len, HAL_MAX_DELAY);
+							I2C_MEMADD_SIZE_8BIT, data, len, HAL_MAX_DELAY);
 }
 int32_t lsm6dso_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data,
-			  uint16_t len)
+						  uint16_t len)
 {
 	return HAL_I2C_Mem_Write(&hi2c3, LSM6DSO_I2C_ADD_L, reg,
-				 I2C_MEMADD_SIZE_8BIT, data, len,
-				 HAL_MAX_DELAY);
+							 I2C_MEMADD_SIZE_8BIT, data, len,
+							 HAL_MAX_DELAY);
 }
 #ifdef SENSOR_TEMP
 sht30_t temp_sensor;
@@ -65,11 +64,14 @@ int8_t msb_init()
 	assert(!LSM6DSO_Init(&imu)); /* This is always connected */
 
 	/* Setup IMU Accelerometer - default 104Hz */
+	LSM6DSO_ACC_SetOutputDataRate_With_Mode(&imu, 104.0f, LSM6DSO_ACC_HIGH_PERFORMANCE_MODE);
 	LSM6DSO_ACC_Enable(&imu);
-	/* Setup IMU Gyroscope */
-	LSM6DSO_GYRO_Enable(&imu);
-
+	// 4=div100
 	LSM6DSO_ACC_Set_Filter_Mode(&imu, 0, 4);
+	/* Setup IMU Gyroscope */
+	LSM6DSO_GYRO_SetOutputDataRate_With_Mode(&imu, 104.0f, LSM6DSO_GYRO_HIGH_PERFORMANCE_MODE);
+	LSM6DSO_GYRO_Enable(&imu);
+	// LSM6DSO_GYRO_Set_Filter_Mode(&imu, 0, 3);
 
 	LSM6DSO_FIFO_Set_Mode(&imu, 0);
 	LSM6DSO_ACC_Disable_Inactivity_Detection(&imu);
@@ -94,7 +96,7 @@ int8_t msb_init()
 
 #if defined SENSOR_SHOCKPOT || defined SENSOR_STRAIN
 	assert(!HAL_ADC_Start_DMA(&hadc1, adc1_buf,
-				  sizeof(adc1_buf) / sizeof(uint32_t)));
+							  sizeof(adc1_buf) / sizeof(uint32_t)));
 #endif
 
 	/* Create Mutexes */
@@ -162,9 +164,10 @@ int8_t distance_read(int32_t *range_mm)
 		return mut_stat;
 
 	VL6180x_RangePollMeasurement(tof, range);
-	if (range->errorStatus) {
+	if (range->errorStatus)
+	{
 		printf("Error in range %s\r\n",
-		       VL6180x_RangeGetStatusErrString(range->errorStatus));
+			   VL6180x_RangeGetStatusErrString(range->errorStatus));
 		return range->errorStatus;
 	}
 
@@ -194,23 +197,29 @@ int8_t vcc5_en_write(bool status)
 }
 
 #ifdef SENSOR_IMU
-int32_t imu_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
-		     lsm6dso_md_t *imu_md_temp, lsm6dso_data_t *imu_data_temp)
+int32_t imu_data_get_accel(LSM6DSO_Axes_t *axes)
 {
 	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
 	if (mut_stat)
 		return mut_stat;
-	HAL_StatusTypeDef hal_stat =
-		lsm6dso_data_get(ctx, aux_ctx, imu_md_temp, imu_data_temp);
-	osMutexRelease(i2c_mutex);
-	if (hal_stat)
-		return hal_stat;
-	return 0;
+	HAL_StatusTypeDef hal_stat = LSM6DSO_ACC_GetAxes(&imu, axes);
+		osMutexRelease(i2c_mutex);
+	return hal_stat;
+}
+int32_t imu_data_get_gyro(LSM6DSO_Axes_t *axes)
+{
+	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
+	if (mut_stat)
+		return mut_stat;
+	HAL_StatusTypeDef hal_stat = LSM6DSO_GYRO_GetAxes(&imu, axes);
+		osMutexRelease(i2c_mutex);
+	return hal_stat;
 }
 
 void motion_fx_init(void)
 {
-	if (STATE_SIZE < MotionFX_GetStateSize()) {
+	if (STATE_SIZE < MotionFX_GetStateSize())
+	{
 		printf("Not enough memory allocated for MotionFX!!");
 		return;
 	}
@@ -245,7 +254,7 @@ void motion_fx_init(void)
 }
 
 void process_motion_fx(MFX_input_t *data_in, MFX_output_t *data_out,
-		       float delta_time)
+					   float delta_time)
 {
 	MotionFX_propagate(mFXState, data_out, data_in, &delta_time);
 
