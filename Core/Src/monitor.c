@@ -139,7 +139,7 @@ void vIMUMonitor(void *pv_params)
 		if (imu_data_get_accel(&axes_accel)) {
 			printf("Failed to get accel data \r\n");
 		}
-		if (imu_data_get_accel(&axes_gyro)) {
+		if (imu_data_get_gyro(&axes_gyro)) {
 			printf("Failed to get gyro data \r\n");
 		}
 
@@ -185,6 +185,13 @@ void vIMUMonitor(void *pv_params)
 		       orientation_data.roll);
 		printf("IMU Temp: %3.2f °C \r\n", temperature_data.temp);
 #endif
+printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,
+		       accel_data.accel_y, accel_data.accel_z);
+		// printf("IMU Gyro x: %d y: %d z: %d \r\n", gyro_data.gyro_x,
+		//        gyro_data.gyro_y, gyro_data.gyro_z);
+		// printf("IMU Orientation Yaw: %d Pitch: %d Roll: %d \r\n",
+		//        orientation_data.yaw, orientation_data.pitch,
+		//        orientation_data.roll);
 
 		/* convert to big endian */
 		endian_swap(&accel_data.accel_x, sizeof(accel_data.accel_x));

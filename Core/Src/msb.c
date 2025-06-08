@@ -64,10 +64,10 @@ int8_t msb_init()
 	assert(!LSM6DSO_Init(&imu)); /* This is always connected */
 
 	/* Setup IMU Accelerometer - default 104Hz */
-	LSM6DSO_ACC_SetOutputDataRate_With_Mode(&imu, 104.0f, LSM6DSO_ACC_HIGH_PERFORMANCE_MODE);
+	LSM6DSO_ACC_SetOutputDataRate_With_Mode(&imu, 833.0f, LSM6DSO_ACC_HIGH_PERFORMANCE_MODE);
 	LSM6DSO_ACC_Enable(&imu);
 	// 4=div100
-	LSM6DSO_ACC_Set_Filter_Mode(&imu, 0, 4);
+	//LSM6DSO_ACC_Set_Filter_Mode(&imu, 0, 4);
 	/* Setup IMU Gyroscope */
 	LSM6DSO_GYRO_SetOutputDataRate_With_Mode(&imu, 104.0f, LSM6DSO_GYRO_HIGH_PERFORMANCE_MODE);
 	LSM6DSO_GYRO_Enable(&imu);
