@@ -13,6 +13,7 @@
 #include "can.h"
 #include "msb_conf.h"
 #include "msb.h"
+#include "monitor.h"
 
 #include "stdio.h"
 #include <assert.h>
@@ -24,7 +25,7 @@ static osMessageQueueId_t can_outbound_queue;
 static osMessageQueueId_t can_inbound_queue;
 
 static uint16_t id_list[4] = {
-	0x000, 0x000, 0x000, 0x002
+	0x000, CANID_WHEEL_ANGLE, 0x000, 0x002
 }; // id_list[0] is reserved for the IMU Zero CAN ID, which is added in can1_init().
 
 extern CAN_HandleTypeDef hcan1;
@@ -160,7 +161,10 @@ void vCanReceive(void *pv_params)
 			case CANID_IMUZERO_FRONTRIGHT:
 				imu_zero(msg.data[0], msg.data[1], msg.data[2]);
 				break;
+			case CANID_WHEEL_ANGLE:
+				break;
 			default:
+				record_wheel_angle(msg.data);
 				break;
 			}
 		}

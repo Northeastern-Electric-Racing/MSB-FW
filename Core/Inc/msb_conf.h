@@ -29,11 +29,12 @@
 #define CANID_IMUZERO_FRONTRIGHT 0x60B
 #define CANID_IMUZERO_BACKLEFT	 0x60C
 #define CANID_IMUZERO_BACKRIGHT	 0x60E
+#define CANID_WHEEL_ANGLE	 0x630
 
 // Sensors to use, comment out to disable
 
 // internal
-// #define CAN_ENABLE
+#define CAN_ENABLE
 
 // on central
 #define SENSOR_TEMP	// SHT30

@@ -5,6 +5,10 @@
 #include "stm32f4xx_hal.h"
 #include "msb_conf.h"
 
+#ifdef CAN_ENABLE // TODO change to wheel sensor flag  
+void record_wheel_angle(uint8_t *data);
+#endif
+
 #ifdef SENSOR_TEMP
 /* Defining Temperature Monitor Task */
 void vTempMonitor(void *pv_params);

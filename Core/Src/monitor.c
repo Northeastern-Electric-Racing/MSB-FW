@@ -16,6 +16,8 @@ extern device_loc_t device_loc;
 extern float imu_rotation_data[3];
 extern float imu_zero_reference[3];
 
+float wheel_angle = 0.0;
+
 uint16_t convert_can(uint16_t original_value, device_loc_t mode)
 {
 	switch (mode) {
@@ -157,6 +159,10 @@ void vIMUMonitor(void *pv_params)
 			printf("Failed to get IMU data \r\n");
 		}
 
+		if (wheel_angle <= 0.1) {
+			imu_zero(mFXOutput.rotation[0], mFXOutput.rotation[1], mFXOutput.rotation[2]);
+		}
+
 		/* Run values through LPF of sample size  */
 		accel_data.accel_x = imu_data_temp.ui.xl.mg[0];
 		accel_data.accel_y = imu_data_temp.ui.xl.mg[1];
@@ -185,6 +191,7 @@ void vIMUMonitor(void *pv_params)
 		mFXInput.mag[2] = 0.0f;
 
 		process_motion_fx(&mFXInput, &mFXOutput, 0.05f);
+
 
 		imu_rotation_data[0] = mFXOutput.rotation[0]; // Yaw
 		imu_rotation_data[1] = mFXOutput.rotation[1]; // Pitch
@@ -375,5 +382,11 @@ void vStrainMonitor(void *pv_params)
 		/* Yield to other tasks */
 		osDelay(DELAY_SHOCKPOT_REFRESH);
 	}
+}
+#endif
+
+#ifdef CAN_ENABLE
+void record_wheel_angle(uint8_t data[8]) {
+	wheel_angle = data[0] | data[1] << 8 | data[2] << 16 | data[3] << 24;
 }
 #endif
