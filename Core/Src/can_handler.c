@@ -115,6 +115,10 @@ void vCanDispatch(void *pv_params)
 					      &msg_from_queue, NULL,
 					      osWaitForever)) {
 #ifdef CAN_ENABLE
+while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0) {
+				osDelay(1);
+			}
+
 			msg_status = can_send_msg(can1, &msg_from_queue);
 			if (msg_status != HAL_OK) {
 				printf("Failed to send CAN message");
@@ -153,7 +157,7 @@ void vCanReceive(void *pv_params)
 
 	for (;;) {
 		while (osOK ==
-		       osMessageQueueGet(can_inbound_queue, &msg, 0U, 0U)) {
+		       osMessageQueueGet(can_inbound_queue, &msg, 0U, osWaitForever)) {
 			switch (msg.id) {
 			case CANID_IMUZERO_BACKLEFT:
 			case CANID_IMUZERO_BACKRIGHT:
@@ -162,9 +166,9 @@ void vCanReceive(void *pv_params)
 				imu_zero(msg.data[0], msg.data[1], msg.data[2]);
 				break;
 			case CANID_WHEEL_ANGLE:
+				record_wheel_angle(msg.data);
 				break;
 			default:
-				record_wheel_angle(msg.data);
 				break;
 			}
 		}

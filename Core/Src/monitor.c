@@ -159,8 +159,8 @@ void vIMUMonitor(void *pv_params)
 			printf("Failed to get IMU data \r\n");
 		}
 
-		if (wheel_angle <= 0.1) {
-			imu_zero(mFXOutput.rotation[0], mFXOutput.rotation[1], mFXOutput.rotation[2]);
+		if (fabs(wheel_angle) <= 1.0) {
+			imu_zero(1, 1, 1); // zero all axes
 		}
 
 		/* Run values through LPF of sample size  */
@@ -311,21 +311,33 @@ void vShockpotMonitor(void *pv_params)
 {
 	can_msg_t shockpot_msg = { .id = convert_can(CANID_SHOCK_SENSE,
 						     device_loc),
-				   .len = 4,
+				   .len = 6,
 				   .data = { 0 } };
 
 	uint32_t shock_value = 0;
 
+	struct __attribute__((__packed__)) {
+		float in;
+		uint16_t raw;
+	} shockpot_data;
+
+
 	for (;;) {
-		shockpot_read(shock_value);
+		shockpot_read(&shock_value);
 
 #ifdef LOG_VERBOSE
 		printf("Shock value:\t%ld\r\n", shock_value);
 #endif
+		//printf("Shock value:\t%ld\r\n", shock_value);
 
-		endian_swap(&shock_value, sizeof(shock_value));
+		// convert to inches, get percent and multiply by 50 mm (stroke length) then convert to inches
+		float in = (shock_value / 4095.0) * 54.44 * (1/25.4);	
+		
+		shockpot_data.in = in;
+		endian_swap(&shockpot_data.in, sizeof(shockpot_data.in));
+		shockpot_data.raw = shock_value;
 
-		memcpy(shockpot_msg.data, &shock_value, shockpot_msg.len);
+		memcpy(shockpot_msg.data, &shockpot_data, shockpot_msg.len);
 		/* Send CAN message */
 		if (queue_can_msg(shockpot_msg)) {
 			printf("Failed to send CAN message\r\n");
@@ -387,6 +399,7 @@ void vStrainMonitor(void *pv_params)
 
 #ifdef CAN_ENABLE
 void record_wheel_angle(uint8_t data[8]) {
-	wheel_angle = data[0] | data[1] << 8 | data[2] << 16 | data[3] << 24;
+	endian_swap(data, 4);
+	wheel_angle = *((float *)data);
 }
 #endif

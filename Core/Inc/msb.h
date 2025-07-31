@@ -38,12 +38,12 @@ int32_t imu_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
 		     lsm6dso_md_t *imu_md_temp, lsm6dso_data_t *imu_data_temp);
 
 #ifdef SENSOR_SHOCKPOT
-void shockpot_read(uint32_t shockpot_sense);
+void shockpot_read(uint32_t *shockpot_sense);
 #endif
 
 #ifdef SENSOR_STRAIN
-void strain1_read(uint32_t strain1);
-void strain2_read(uint32_t strain2);
+void strain1_read(uint32_t *strain1);
+void strain2_read(uint32_t *strain2);
 #endif
 
 #ifdef SENSOR_IMU

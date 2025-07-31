@@ -64,11 +64,12 @@ int8_t msb_init()
 	/* Initialize the IMU */
 	assert(!LSM6DSO_Init(&imu)); /* This is always connected */
 
-	/* Setup IMU Accelerometer */
+	/* Setup IMU Accelerometer - default 104Hz */
 	LSM6DSO_ACC_Enable(&imu);
-
 	/* Setup IMU Gyroscope */
 	LSM6DSO_GYRO_Enable(&imu);
+
+	LSM6DSO_ACC_Set_Filter_Mode(&imu, 0, 4);
 
 	LSM6DSO_FIFO_Set_Mode(&imu, 0);
 	LSM6DSO_ACC_Disable_Inactivity_Detection(&imu);
@@ -134,21 +135,21 @@ void adc1_read(uint32_t result_buf[3])
 #endif
 
 #ifdef SENSOR_SHOCKPOT
-void shockpot_read(uint32_t shockpot_sense)
+void shockpot_read(uint32_t *shockpot_sense)
 {
-	memcpy((uint32_t *)shockpot_sense, adc1_buf, sizeof(shockpot_sense));
+	memcpy(shockpot_sense, adc1_buf, sizeof(shockpot_sense));
 }
 #endif
 
 #ifdef SENSOR_STRAIN
-void strain1_read(uint32_t strain1)
+void strain1_read(uint32_t *strain1)
 {
-	memcpy((uint32_t *)strain1, adc1_buf + 1, sizeof(strain1));
+	memcpy(strain1, adc1_buf + 1, sizeof(strain1));
 }
 
-void strain2_read(uint32_t strain2)
+void strain2_read(uint32_t *strain2)
 {
-	memcpy((uint32_t *)strain2, adc1_buf + 2, sizeof(strain2));
+	memcpy(strain2, adc1_buf + 2, sizeof(strain2));
 }
 #endif
 
@@ -262,15 +263,15 @@ void imu_zero(uint8_t yaw_byte, uint8_t pitch_byte, uint8_t roll_byte)
 	/* Stores the current IMU rotation data in imu_zero_reference for selected axes only. */
 	if (yaw_byte > 0) {
 		imu_zero_reference[0] = imu_rotation_data[0];
-		printf("Zeroed yaw.\n");
+		//printf("Zeroed yaw.\n");
 	}
 	if (pitch_byte > 0) {
 		imu_zero_reference[1] = imu_rotation_data[1];
-		printf("Zeroed pitch.\n");
+		//printf("Zeroed pitch.\n");
 	}
 	if (roll_byte > 0) {
 		imu_zero_reference[2] = imu_rotation_data[2];
-		printf("Zeroed roll.\n");
+		//printf("Zeroed roll.\n");
 	}
 }
 #endif

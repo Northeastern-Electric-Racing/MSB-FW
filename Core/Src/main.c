@@ -121,7 +121,6 @@ int _write(int file, char* ptr, int len) {
   */
 int main(void)
 {
-
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -153,7 +152,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_CRC_Init();
   /* USER CODE BEGIN 2 */
-  printf("INIT MSB... FINDING ID");
+
   // determine MSB location
   bool loc1 = HAL_GPIO_ReadPin(Addr0_GPIO_Port, Addr0_Pin);
   bool loc2 = HAL_GPIO_ReadPin(Addr1_GPIO_Port, Addr1_Pin);
@@ -180,30 +179,6 @@ int main(void)
     device_loc = DEVICE_FRONT_LEFT;
   }
   HAL_Delay(500);
-  uint8_t devices = 0u;
-  printf("Searching for I2C devices on the bus...\n");
-  /* Values outside 0x03 and 0x77 are invalid. */
-  for (uint8_t i = 0x03u; i < 0x78u; i++)
-  {
-    HAL_IWDG_Refresh(&hiwdg);
-    uint8_t address = i << 1u ;
-    /* In case there is a positive feedback, print it out. */
-    if (HAL_OK == HAL_I2C_IsDeviceReady(&hi2c3, address, 3u, 10u))
-    {
-      printf("Device found: 0x%02X\n", address);
-      devices++;
-    }
-  }
-  /* Feedback of the total number of devices. */
-  if (0u == devices)
-  {
-    printf("No device found.\n");
-  }
-  else
-  {
-    printf("Total found devices: %d\n", devices);
-  }
-
 
   /* USER CODE END 2 */
 
@@ -216,7 +191,7 @@ int main(void)
   // determine the configuration of the device
 
   msb_init();
-  vcc5_en_write(true);
+  vcc5_en_write(false);
   can1_init();
 
   /* USER CODE END RTOS_MUTEX */
@@ -332,7 +307,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV4;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
@@ -361,7 +336,7 @@ static void MX_ADC1_Init(void)
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV6;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = ENABLE;
   hadc1.Init.ContinuousConvMode = ENABLE;
@@ -371,7 +346,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc1.Init.NbrOfConversion = 3;
   hadc1.Init.DMAContinuousRequests = ENABLE;
-  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
