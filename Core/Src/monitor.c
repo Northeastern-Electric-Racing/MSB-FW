@@ -157,12 +157,9 @@ void vIMUMonitor(void *pv_params)
 		mFXInput.acc[2] = (float)(axes_accel.z / 1000.0f);
 
 		// Gyro (Convert mdps to dps)
-		mFXInput.gyro[0] =
-			(float)(axes_gyro.x * 0.001f);
-		mFXInput.gyro[1] =
-			(float)(axes_gyro.y * 0.001f);
-		mFXInput.gyro[2] =
-			(float)(axes_gyro.z * 0.001f);
+		mFXInput.gyro[0] = (float)(axes_gyro.x * 0.001f);
+		mFXInput.gyro[1] = (float)(axes_gyro.y * 0.001f);
+		mFXInput.gyro[2] = (float)(axes_gyro.z * 0.001f);
 
 		// Magnetometer
 		mFXInput.mag[0] = 0.0f;
@@ -185,8 +182,8 @@ void vIMUMonitor(void *pv_params)
 		       orientation_data.roll);
 		printf("IMU Temp: %3.2f °C \r\n", temperature_data.temp);
 #endif
-// printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,
-// 		       accel_data.accel_y, accel_data.accel_z);
+		// printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,
+		// 		       accel_data.accel_y, accel_data.accel_z);
 		// printf("IMU Gyro x: %d y: %d z: %d \r\n", gyro_data.gyro_x,
 		//        gyro_data.gyro_y, gyro_data.gyro_z);
 		// printf("IMU Orientation Yaw: %d Pitch: %d Roll: %d \r\n",
@@ -291,7 +288,6 @@ void vShockpotMonitor(void *pv_params)
 		uint16_t raw;
 	} shockpot_data;
 
-
 	for (;;) {
 		shockpot_read(&shock_value);
 
@@ -301,8 +297,8 @@ void vShockpotMonitor(void *pv_params)
 		//printf("Shock value:\t%ld\r\n", shock_value);
 
 		// convert to inches, get percent and multiply by 50 mm (stroke length) then convert to inches
-		float in = (shock_value / 4095.0) * 54.44 * (1/25.4);	
-		
+		float in = (shock_value / 4095.0) * 54.44 * (1 / 25.4);
+
 		shockpot_data.in = in;
 		endian_swap(&shockpot_data.in, sizeof(shockpot_data.in));
 		shockpot_data.raw = shock_value;
