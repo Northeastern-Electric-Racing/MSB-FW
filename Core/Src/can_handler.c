@@ -62,7 +62,7 @@ void vCanDispatch(void *pv_params)
 					      &msg_from_queue, NULL,
 					      osWaitForever)) {
 #ifdef CAN_ENABLE
-while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0) {
+			while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0) {
 				osDelay(1);
 			}
 

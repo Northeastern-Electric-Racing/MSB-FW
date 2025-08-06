@@ -16,8 +16,7 @@ extern device_loc_t device_loc;
 
 osMutexId_t i2c_mutex;
 
-// reads imu reg
-
+// overriden functions
 int32_t lsm6dso_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data,
 			 uint16_t len)
 {
@@ -65,11 +64,16 @@ int8_t msb_init()
 	assert(!LSM6DSO_Init(&imu)); /* This is always connected */
 
 	/* Setup IMU Accelerometer - default 104Hz */
+	LSM6DSO_ACC_SetOutputDataRate_With_Mode(
+		&imu, 833.0f, LSM6DSO_ACC_HIGH_PERFORMANCE_MODE);
 	LSM6DSO_ACC_Enable(&imu);
+	// 4=div100
+	LSM6DSO_ACC_Set_Filter_Mode(&imu, 0, 3);
 	/* Setup IMU Gyroscope */
+	LSM6DSO_GYRO_SetOutputDataRate_With_Mode(
+		&imu, 104.0f, LSM6DSO_GYRO_HIGH_PERFORMANCE_MODE);
 	LSM6DSO_GYRO_Enable(&imu);
-
-	LSM6DSO_ACC_Set_Filter_Mode(&imu, 0, 4);
+	// LSM6DSO_GYRO_Set_Filter_Mode(&imu, 0, 3);
 
 	LSM6DSO_FIFO_Set_Mode(&imu, 0);
 	LSM6DSO_ACC_Disable_Inactivity_Detection(&imu);
@@ -194,18 +198,23 @@ int8_t vcc5_en_write(bool status)
 }
 
 #ifdef SENSOR_IMU
-int32_t imu_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
-		     lsm6dso_md_t *imu_md_temp, lsm6dso_data_t *imu_data_temp)
+int32_t imu_data_get_accel(LSM6DSO_Axes_t *axes)
 {
 	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
 	if (mut_stat)
 		return mut_stat;
-	HAL_StatusTypeDef hal_stat =
-		lsm6dso_data_get(ctx, aux_ctx, imu_md_temp, imu_data_temp);
+	HAL_StatusTypeDef hal_stat = LSM6DSO_ACC_GetAxes(&imu, axes);
 	osMutexRelease(i2c_mutex);
-	if (hal_stat)
-		return hal_stat;
-	return 0;
+	return hal_stat;
+}
+int32_t imu_data_get_gyro(LSM6DSO_Axes_t *axes)
+{
+	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);
+	if (mut_stat)
+		return mut_stat;
+	HAL_StatusTypeDef hal_stat = LSM6DSO_GYRO_GetAxes(&imu, axes);
+	osMutexRelease(i2c_mutex);
+	return hal_stat;
 }
 
 void motion_fx_init(void)

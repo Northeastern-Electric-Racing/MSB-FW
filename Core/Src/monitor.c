@@ -116,17 +116,6 @@ void vIMUMonitor(void *pv_params)
 		int16_t gyro_z;
 	} gyro_data;
 
-	struct __attribute__((__packed__)) {
-		float_t temp;
-	} temperature_data;
-
-	stmdev_ctx_t ctx;
-	stmdev_ctx_t aux_ctx;
-	// int16_t temperature_data_temp;
-
-	lsm6dso_md_t imu_md_temp;
-	lsm6dso_data_t imu_data_temp;
-
 	can_msg_t imu_orientation_msg = {
 		.id = convert_can(CANID_IMU_ORIENTATION, device_loc),
 		.len = 6,
@@ -142,40 +131,35 @@ void vIMUMonitor(void *pv_params)
 		int16_t yaw;
 	} orientation_data;
 
-	/* Add parameters for formatting data */
-	imu_md_temp.ui.gy.fs = LSM6DSO_500dps;
-	imu_md_temp.ui.gy.odr = LSM6DSO_GY_UI_52Hz_LP;
-	imu_md_temp.ui.xl.fs = LSM6DSO_XL_UI_2g;
-	imu_md_temp.ui.xl.odr = LSM6DSO_XL_UI_52Hz_LP;
+	LSM6DSO_Axes_t axes_accel;
+	LSM6DSO_Axes_t axes_gyro;
 
 	for (;;) {
 		/* Take measurement */
-		if (imu_data_get(&ctx, &aux_ctx, &imu_md_temp,
-				 &imu_data_temp)) {
-			printf("Failed to get IMU data \r\n");
+		if (imu_data_get_accel(&axes_accel)) {
+			printf("Failed to get accel data \r\n");
+		}
+		if (imu_data_get_gyro(&axes_gyro)) {
+			printf("Failed to get gyro data \r\n");
 		}
 
 		/* Run values through LPF of sample size  */
-		accel_data.accel_x = imu_data_temp.ui.xl.mg[0];
-		accel_data.accel_y = imu_data_temp.ui.xl.mg[1];
-		accel_data.accel_z = imu_data_temp.ui.xl.mg[2];
-		gyro_data.gyro_x = imu_data_temp.ui.gy.mdps[0];
-		gyro_data.gyro_y = imu_data_temp.ui.gy.mdps[1];
-		gyro_data.gyro_z = imu_data_temp.ui.gy.mdps[2];
-		temperature_data.temp = imu_data_temp.ui.heat.deg_c;
+		accel_data.accel_x = axes_accel.x;
+		accel_data.accel_y = axes_accel.y;
+		accel_data.accel_z = axes_accel.z;
+		gyro_data.gyro_x = axes_gyro.x;
+		gyro_data.gyro_y = axes_gyro.y;
+		gyro_data.gyro_z = axes_gyro.z;
 
 		// Acc (Convert mg to g)
-		mFXInput.acc[0] = (float)(imu_data_temp.ui.xl.mg[0] / 1000.0f);
-		mFXInput.acc[1] = (float)(imu_data_temp.ui.xl.mg[1] / 1000.0f);
-		mFXInput.acc[2] = (float)(imu_data_temp.ui.xl.mg[2] / 1000.0f);
+		mFXInput.acc[0] = (float)(axes_accel.x / 1000.0f);
+		mFXInput.acc[1] = (float)(axes_accel.y / 1000.0f);
+		mFXInput.acc[2] = (float)(axes_accel.z / 1000.0f);
 
 		// Gyro (Convert mdps to dps)
-		mFXInput.gyro[0] =
-			(float)(imu_data_temp.ui.gy.mdps[0] * 0.001f);
-		mFXInput.gyro[1] =
-			(float)(imu_data_temp.ui.gy.mdps[1] * 0.001f);
-		mFXInput.gyro[2] =
-			(float)(imu_data_temp.ui.gy.mdps[2] * 0.001f);
+		mFXInput.gyro[0] = (float)(axes_gyro.x * 0.001f);
+		mFXInput.gyro[1] = (float)(axes_gyro.y * 0.001f);
+		mFXInput.gyro[2] = (float)(axes_gyro.z * 0.001f);
 
 		// Magnetometer
 		mFXInput.mag[0] = 0.0f;
@@ -198,6 +182,13 @@ void vIMUMonitor(void *pv_params)
 		       orientation_data.roll);
 		printf("IMU Temp: %3.2f °C \r\n", temperature_data.temp);
 #endif
+		// printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,
+		// 		       accel_data.accel_y, accel_data.accel_z);
+		// printf("IMU Gyro x: %d y: %d z: %d \r\n", gyro_data.gyro_x,
+		//        gyro_data.gyro_y, gyro_data.gyro_z);
+		// printf("IMU Orientation Yaw: %d Pitch: %d Roll: %d \r\n",
+		//        orientation_data.yaw, orientation_data.pitch,
+		//        orientation_data.roll);
 
 		/* convert to big endian */
 		endian_swap(&accel_data.accel_x, sizeof(accel_data.accel_x));
@@ -297,7 +288,6 @@ void vShockpotMonitor(void *pv_params)
 		uint16_t raw;
 	} shockpot_data;
 
-
 	for (;;) {
 		shockpot_read(&shock_value);
 
@@ -307,8 +297,8 @@ void vShockpotMonitor(void *pv_params)
 		//printf("Shock value:\t%ld\r\n", shock_value);
 
 		// convert to inches, get percent and multiply by 50 mm (stroke length) then convert to inches
-		float in = (shock_value / 4095.0) * 54.44 * (1/25.4);	
-		
+		float in = (shock_value / 4095.0) * 54.44 * (1 / 25.4);
+
 		shockpot_data.in = in;
 		endian_swap(&shockpot_data.in, sizeof(shockpot_data.in));
 		shockpot_data.raw = shock_value;
