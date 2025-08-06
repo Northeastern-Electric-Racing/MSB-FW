@@ -185,8 +185,8 @@ void vIMUMonitor(void *pv_params)
 		       orientation_data.roll);
 		printf("IMU Temp: %3.2f °C \r\n", temperature_data.temp);
 #endif
-printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,
-		       accel_data.accel_y, accel_data.accel_z);
+// printf("IMU Accel x: %d y: %d z: %d \r\n", accel_data.accel_x,
+// 		       accel_data.accel_y, accel_data.accel_z);
 		// printf("IMU Gyro x: %d y: %d z: %d \r\n", gyro_data.gyro_x,
 		//        gyro_data.gyro_y, gyro_data.gyro_z);
 		// printf("IMU Orientation Yaw: %d Pitch: %d Roll: %d \r\n",

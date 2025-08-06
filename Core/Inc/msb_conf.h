@@ -33,7 +33,7 @@
 
 // on central
 #define SENSOR_TEMP	// SHT30
-#define SENSOR_SHOCKPOT // ADC1
+//#define SENSOR_SHOCKPOT // ADC1
 //#define SENSOR_STRAIN	// ADC1
 //#define SENSOR_TOF       // VL6180X
 
