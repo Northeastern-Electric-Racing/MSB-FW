@@ -68,7 +68,7 @@ static inline uint8_t sht30_i2c_read(uint8_t *data, uint16_t command,
 static inline uint8_t sht30_i2c_blocking_read(uint8_t *data, uint16_t command,
 					      uint8_t dev_address,
 					      uint8_t length)
-{	
+{
 	uint8_t command_buffer[2] = { (command & 0xff00u) >> 8u,
 				      command & 0xffu };
 	// write command to sht30 before reading
@@ -138,9 +138,6 @@ int8_t msb_init()
 }
 
 #ifdef SENSOR_TEMP
-/// @brief Measure the temperature and humidity of central MSB SHT30
-/// @param out
-/// @return error code
 int8_t central_temp_measure(float *temp, float *humidity)
 {
 	osStatus_t mut_stat = osMutexAcquire(i2c_mutex, osWaitForever);

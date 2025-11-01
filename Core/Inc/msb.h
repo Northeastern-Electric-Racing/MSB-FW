@@ -20,6 +20,9 @@ typedef enum {
 int8_t msb_init();
 
 #ifdef SENSOR_TEMP
+/// @brief Measure the temperature and humidity of central MSB SHT30
+/// @param out
+/// @return error code
 int8_t central_temp_measure(float *temp, float *humidity);
 #endif
 
